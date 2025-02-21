@@ -9,9 +9,10 @@ class DbUser(Base):
     __tablename__ ='users'
     id = Column(Integer,primary_key=True, index= True)
     user_name = Column(String)
-    email = Column(String, unique=True)
+    email = Column(String)
     password = Column(String)
     about = Column(String)
     avatar = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
+    # driver_license= Column(Boolean)
     
