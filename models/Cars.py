@@ -17,4 +17,6 @@ class DbCar(Base):
     wifi_available = Column(Boolean)
     air_conditioning = Column(Boolean)
     pet_friendly = Column(Boolean)
+    car_status = Column(String) # Pending , approved , rejected by admin
+    car_availability_status = Column(String)  # available , booked , in use , unavailable
     #user = relationship("DbUser", back_populates='cars')
