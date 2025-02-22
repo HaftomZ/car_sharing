@@ -7,9 +7,9 @@ app = FastAPI()
 app.include_router(user_routers.router)
 
 
-
 @app.get('/')
 def say_hello():
     return {"message:hello world"}
+
 
 Users.Base.metadata.create_all(engine)
