@@ -3,6 +3,8 @@ from sqlalchemy import Column
 from sqlalchemy.sql.sqltypes import Integer, String, Boolean, Float
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import relationship
+from models.Cars import DbCar
+from models.Reviews import DbReview
 
 
 class DbUser(Base):
@@ -16,4 +18,5 @@ class DbUser(Base):
     phone_number = Column(String, nullable=True)
     average_rating = Column(Float)
     # driver_license= Column(Boolean)
+    lefted_reviews = relationship("DbReview", back_populates="user")
     
