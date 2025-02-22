@@ -32,7 +32,7 @@ def get_all_user_cars(db: Session, user_id: int):
 def update_user_car(db: Session, user_id: int , car_id: int, request: CarBase):
     car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == user_id)
     if not car.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'The is no car with id {car_id}')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'There is no car with id {car_id}')
     
     car.update({ 
         DbCar.model : request.model,
@@ -52,8 +52,20 @@ def update_user_car(db: Session, user_id: int , car_id: int, request: CarBase):
 def delete_user_car(db: Session, user_id: int, car_id: int):
     car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == user_id).first()
     if not car:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'The is no car with id {car_id}')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'There is no car with id {car_id}')
     
     db.delete(car)
     db.commit()
     return 'Your car has been removed successfully!'
+
+#update car availability status
+def update_car_availability_status(db: Session, user_id: int , car_id: int, status: str):
+    car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == user_id)
+    if not car.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'There is no car with id {car_id}')
+    
+    car.update({ 
+       DbCar.car_availability_status : status
+        })
+    db.commit()
+    return f'Your car availability status has been updated successfully!'

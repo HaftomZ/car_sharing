@@ -31,6 +31,7 @@ class CarDisplay(BaseModel):
     wifi_available : bool
     air_conditioning : bool
     pet_friendly : bool
+    car_availability_status: str | None = None
     #user : User   #no need now to show the user details , we need it for admin later
     class Config():
         orm_mode = True
