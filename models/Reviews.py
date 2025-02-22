@@ -11,7 +11,7 @@ class DbReview (Base):
     author = Column()
     created_at = Column(String, default=func.now())
     mark = Column(Integer)
-    text = Column(String)
+    text_description = Column(String)
 
 
 
