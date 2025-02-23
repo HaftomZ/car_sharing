@@ -14,5 +14,4 @@ class DbUser(Base):
     about = Column(String)
     avatar = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
-    # driver_license= Column(Boolean)
     

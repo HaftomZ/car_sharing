@@ -32,7 +32,7 @@ def update_user(db: Session, id:int, request: UserBase):
         DbUser.password: Hash.bcrypt(request.password),
         DbUser.about: request.about,
         DbUser.avatar: request.avatar,
-        DbUser.phone_number: request.phone_number
+        DbUser.phone_number: request.phone_number,
     })
     db.commit()
     return 'user information has been updated successfully!'
