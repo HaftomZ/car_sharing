@@ -17,4 +17,4 @@ class DbUser(Base):
     average_rating = Column(Float)
     # driver_license= Column(Boolean)
     cars = relationship("DbCar", back_populates='user')
-    
+    lefted_reviews = relationship("DbReview", back_populates="user")
