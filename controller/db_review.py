@@ -7,7 +7,7 @@ def create_review(db: Session, request: ReviewBase):
     new_review = DbReview(
         mark=request.mark,
         text_description=request.text_description,
-        user_id = request.creator_id
+        user_id=request.creator_id
     )
     db.add(new_review)
     db.commit()

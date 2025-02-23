@@ -3,7 +3,7 @@ from sqlalchemy import Column
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import Integer, String
 from sqlalchemy.sql.schema import ForeignKey
-from models.Users import DbUser
+#from models.Users import DbUser
 from sqlalchemy.orm import relationship
 
 

@@ -14,13 +14,13 @@ router = APIRouter(
 
 # Create review
 @router.post("/", response_model=ReviewDisplay)
-def create_review(request: ReviewBase, db: Session = Depends(get_db())):
+def create_review(request: ReviewBase, db: Session = Depends(get_db)):
     return db_review.create_review(db, request)
 
 
 # Read specific review
 @router.get("/{id}", response_model=ReviewDisplay)
-def get_review(id: int, db: Session = Depends(get_db())):
+def get_review(id: int, db: Session = Depends(get_db)):
     return db_review.get_review(db, id)
 
 # Update review
