@@ -1,12 +1,13 @@
 from pydantic import BaseModel
 
 
-#User inside ReviewDisplay
+# User inside ReviewDisplay
 class User(BaseModel):
     id: int
     username: str
     class Config():
         orm_mode = True
+
 
 class ReviewBase(BaseModel):
     mark = int
