@@ -17,6 +17,6 @@ class DbUser(Base):
     about = Column(String)
     avatar = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
-    car = relationship("DbCar", back_populates="users")
-    trip_booked = relationship("DbBooking", back_populates='users')
-    
+    cars = relationship("DbCar", back_populates="user")
+    trip_booked = relationship("DbBooking", back_populates="user")
+    lefted_reviews = relationship("DbReview", back_populates="user")
