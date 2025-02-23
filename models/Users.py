@@ -16,4 +16,5 @@ class DbUser(Base):
     phone_number = Column(String, nullable=True)
     average_rating = Column(Float)
     # driver_license= Column(Boolean)
+    cars = relationship("DbCar", back_populates='user')
     
