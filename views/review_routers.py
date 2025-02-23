@@ -17,6 +17,11 @@ router = APIRouter(
 def create_review(request: ReviewBase, db: Session = Depends(get_db())):
     return db_review.create_review(db, request)
 
-# Read one review
+
+# Read specific review
+@router.get("/{id}", response_model=ReviewDisplay)
+def get_review(id: int, db: Session = Depends(get_db())):
+    return db_review.get_review(db, id)
+
 # Update review
 # Delete review
