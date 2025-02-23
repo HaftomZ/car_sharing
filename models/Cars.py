@@ -23,4 +23,5 @@ class DbCar(Base):
     car_status = Column(String, default="Pending") # Pending , approved , rejected by admin
     car_availability_status = Column(String , nullable=True)  # available , booked , in use , unavailable
     user = relationship("DbUser", back_populates='cars')
-    trip_booked = relationship("DbBooking", back_populates='car')
+    trip = relationship("DbTrip", back_populates="car")
+    #trip_booked = relationship("DbBooking", back_populates='car')
