@@ -15,4 +15,5 @@ class DbUser(Base):
     avatar = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
     # driver_license= Column(Boolean)
+    cars = relationship("DbCar", back_populates='user')
     
