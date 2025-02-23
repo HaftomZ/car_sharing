@@ -1,39 +1,40 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
-
-class BookingBase(BaseModel):
-    """Base schema for booking data shared by both creating and updating bookings."""
+# BookingList inside listBookingResponse
+class BookingList(BaseModel):
     booking_id: int
     start_time: datetime
     end_time: datetime
-    location: Optional[str] = None  # Making location optional
-    status: Optional[str] = None    # Making status optional
-    created_at: Optional[datetime] = None  # Optional field for created_at
-    updated_at: Optional[datetime] = None  # Optional field for updated_at
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    location: str
+    class Config:
+        orm_mode = True
+class BookingBase(BaseModel):
+    """Base schema for booking data shared by both creating and updating bookings."""
+    booker_id: int
+    car_id: int
+    start_time: datetime
+    end_time: datetime
+    location: str
 
     class Config:
         orm_mode = True
-
-class BookingCreate(BookingBase):
-    """Schema for creating a new booking, but doesn’t add any additional fields,
-    because all fields required to create a booking are already covered by BookingBase"""
-    pass
-
-class BookingUpdate(BookingBase):
-    """Schema for updating an existing booking."""
-    # Removed redundant booking_id here
-
-class BookingResponse(BookingBase):
+class listBookingResponse(BaseModel):
+    booking_list:list[BookingList] =[]
+    class Config:
+        orm_mode = True
+class BookingResponse(BaseModel):
     """Schema for the response data after booking has been created or updated."""
-    booking_id: Optional[int]
-    status: Optional[str] = None  # status is optional
+    status: str  
     created_at: datetime
     updated_at: datetime
     start_time: datetime
     end_time: datetime
-    location: Optional[str] = None  # location is optional
-
+    location: str
+    message:str
     class Config:
         orm_mode = True
 

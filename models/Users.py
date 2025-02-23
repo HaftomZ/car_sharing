@@ -3,8 +3,9 @@ from sqlalchemy import Column
 from sqlalchemy.sql.sqltypes import Integer, String, Boolean, Float
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import relationship
-from models.Cars import DbCar
-from models.Reviews import DbReview
+# from models.Cars import DbCar
+# from models.Reviews import DbReview
+# from models.Booking import DbBooking
 
 
 class DbUser(Base):
@@ -20,4 +21,5 @@ class DbUser(Base):
     # driver_license= Column(Boolean)
     cars = relationship("DbCar", back_populates='user')
     lefted_reviews = relationship("DbReview", back_populates="user")
+    trip_booked = relationship("DbBooking", back_populates="user")
     
