@@ -1,13 +1,16 @@
 from config.db_connect import Base
 from sqlalchemy import Column
-from sqlalchemy.sql.sqltypes import Integer , String , Boolean
+from sqlalchemy.sql.sqltypes import Integer, String, Boolean, Float
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.orm import relationship
+# from models.Cars import DbCar
+# from models.Reviews import DbReview
+# from models.Booking import DbBooking
 
 
 class DbUser(Base):
-    __tablename__ ='users'
-    id = Column(Integer,primary_key=True, index= True)
+    __tablename__ = 'users'
+    id = Column(Integer,primary_key=True, index=True)
     user_name = Column(String)
     email = Column(String)
     password = Column(String)
