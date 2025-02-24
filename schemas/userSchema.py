@@ -1,7 +1,11 @@
 from pydantic import BaseModel
 from typing import List
 
-
+class Booking(BaseModel):
+    booking_id: int
+    status : str
+    class Config():
+        orm_mode = True
 # Review inside userDisplay
 class Review(BaseModel):
     mark: int
@@ -26,5 +30,6 @@ class userDisplay(BaseModel):
     avatar: str | None = None
     phone_number: str | None = None
     lefted_reviews: List[Review] = []
+    bookings: List[Booking] = []
     class Config():
         orm_mode = True

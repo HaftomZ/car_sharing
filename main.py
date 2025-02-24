@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from config.db_connect import engine
 from models import Users , Cars
-from views import user_routers , car_routers, review_routers,  booking_routers, trip_routers
+from views import user_routers , car_routers, review_routers, booking_routers, trip_routers
 
 app = FastAPI()
 app.include_router(user_routers.router)
