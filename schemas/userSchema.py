@@ -1,7 +1,11 @@
 from pydantic import BaseModel
 from typing import List
 
-
+class Booking(BaseModel):
+    booking_id: int
+    status : str
+    class Config():
+        orm_mode = True
 # Review inside userDisplay
 class Review(BaseModel):
     mark: int
