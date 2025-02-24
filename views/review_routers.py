@@ -38,12 +38,12 @@ def get_review(creator_id: int, db: Session = Depends(get_db)):
 
 
 # Update review
-@router.post('/{id}/update')
+@router.put('/{id}/update')
 def update_review(id: int, request: ReviewBase, db: Session = Depends(get_db)):
     return db_review.update_review(db, id, request)
 
 
 # Delete review
-@router.get('/delete/{id}')
+@router.delete('/delete/{id}')
 def delete_review(id: int, db: Session = Depends(get_db)):
     return db_review.delete_review(db, id)
