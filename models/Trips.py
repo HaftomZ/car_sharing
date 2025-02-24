@@ -19,7 +19,7 @@ class DbTrip(Base):
     arrival_time = Column(DateTime, nullable=True)  # end time
     available_adult_seats = Column(Integer, nullable=True)  # available seats
     available_children_seats = Column(Integer, nullable=True)  # available seats
-    passengers = Column(list, nullable=True)  # number of passengers
+    #passengers = Column(list, nullable=True)  # number of passengers
     status = Column(String, default="open", nullable=True)  # e.g. open, closed, canceled
     created_at = Column(DateTime, default=datetime.datetime.now)  # Created at timestamp
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # Updated at timestamp, auto-updated
