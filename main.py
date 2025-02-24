@@ -9,8 +9,8 @@ app.include_router(booking_routers.router)
 app.include_router(car_routers.router)
 app.include_router(review_routers.router)
 @app.get('/')
-def say_hello():
-    return {"message:hello world"}
+def welcome():
+    return {"message:Welcome to HRIN app!, use /docs to use the app!"}
 
 
 Users.Base.metadata.create_all(engine)
