@@ -19,13 +19,13 @@ def get_all_users(db: Session = Depends(get_db)):
     return users.get_all_users(db)
 
 @router.get('/{id}', response_model=userDisplay)
-def get_user(id: int, db: Session = Depends(get_db)):
-    return users.get_one_user(db, id)
+def get_user(email: str, password: str, db: Session = Depends(get_db)):
+    return users.login_user(db, email, password)
 
-@router.post('/{id}/update')
+@router.put('/{id}/update')
 def update_user(id: int, request: UserBase, db: Session = Depends(get_db)):
     return users.update_user(db, id, request)
 
-@router.get('/delete/{id}')
+@router.delete('/delete/{id}')
 def delete_user(id: int, db: Session = Depends(get_db)):
     return users.delete_user(db, id)
