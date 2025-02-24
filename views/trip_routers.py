@@ -1,4 +1,4 @@
-from schemas.tripSchema import*
+from schemas.tripSchema import TripBase, TripResponse
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from config.db_connect import get_db
