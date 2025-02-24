@@ -23,5 +23,20 @@ def create_review(request: ReviewBase, db: Session = Depends(get_db)):
 def get_review(id: int, db: Session = Depends(get_db)):
     return db_review.get_review(db, id)
 
+
+# Read all reviews
+@router.get("/{id}", response_model=ReviewDisplay)
+def get_review(id: int, db: Session = Depends(get_db)):
+    return db_review.get_review(db, id)
+
+
 # Update review
+@router.post('/{id}/update')
+def update_review(id: int, request: ReviewBase, db: Session = Depends(get_db())):
+    return db_review.update_review(db, id, request)
+
+
 # Delete review
+@router.get('/delete/{id}')
+def delete_review(id: int, db: Session = Depends(get_db())):
+    return db_review.delete_review(db, id)

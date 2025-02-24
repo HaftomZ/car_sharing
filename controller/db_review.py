@@ -19,3 +19,32 @@ def get_review(db: Session, id: int):
     review = db.query(DbReview).filter(DbReview.id == id).first()
     # Handle errors
     return review
+
+
+def get_all_reviews(db: Session, user_id: int):
+    review = db.query(DbReview).filter(DbReview.user_id == user_id).all()
+    # Handle errors
+    return review
+
+
+def get_all_reviews_left(db: Session, creator_id: int):
+    review = db.query(DbReview).filter(DbReview.creator_id == creator_id).all()
+    # Handle errors
+    return review
+
+
+def update_review(db: Session, id: int, request: ReviewBase):
+    review = db.query(DbReview).filter(DbReview.id == id)
+    review.update({
+        DbReview.mark: request.mark,
+        DbReview.text_description: request.text_description
+    })
+    db.commit()
+    return 'ok'
+
+
+def delete_review(db: Session, id: int):
+    review = db.query(DbReview).filter(DbReview.id == id).first()
+    db.delete(review)
+    db.commit()
+    return "ok"
