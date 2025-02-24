@@ -10,10 +10,6 @@ class DbCar(Base):
     __tablename__ ='cars'
     id = Column(Integer,primary_key=True, index= True)
     owner_id = Column(Integer, ForeignKey('users.id'))
-    id = Column(Integer,primary_key=True, index=True)
-    #owner_id = Column(Integer, ForeignKey('users.id'))
-    id = Column(Integer,primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey('users.id'))
     model = Column(String)
     year = Column(Integer)
     adult_seats = Column(Integer)
@@ -26,4 +22,3 @@ class DbCar(Base):
     car_availability_status = Column(String , nullable=True)  # available , booked , in use , unavailable
     user = relationship("DbUser", back_populates='cars')
     trip = relationship("DbTrip", back_populates="car")
-    #trip_booked = relationship("DbBooking", back_populates='car')

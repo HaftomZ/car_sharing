@@ -21,7 +21,6 @@ class DbUser(Base):
     # driver_license= Column(Boolean)
     cars = relationship("DbCar", back_populates='user')
     trip = relationship("DbTrip", back_populates="user")
-    cars = relationship("DbCar", back_populates="user")
     trip_booked = relationship("DbBooking", back_populates="user")
     lefted_reviews = relationship("DbReview", back_populates="user")
     
