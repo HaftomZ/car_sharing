@@ -3,10 +3,6 @@ from enum import Enum
 from sqlalchemy.orm import relationship
 from config.db_connect import Base
 import datetime
-# class TripStatus(str,Enum):
-#     open = "open"
-#     closed = "closed"   
-#     canceled = "canceled"
 class DbTrip(Base):
     __tablename__ = "trips"
     
@@ -19,7 +15,7 @@ class DbTrip(Base):
     arrival_time = Column(DateTime, nullable=True)  # end time
     available_adult_seats = Column(Integer, nullable=True)  # available seats
     available_children_seats = Column(Integer, nullable=True)  # available seats
-    passengers = Column(list, nullable=True)  # number of passengers
+    passengers = Column(String, default="Haftom", nullable=True)  # This should be changed later in to list of passengers
     status = Column(String, default="open", nullable=True)  # e.g. open, closed, canceled
     created_at = Column(DateTime, default=datetime.datetime.now)  # Created at timestamp
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # Updated at timestamp, auto-updated

@@ -5,7 +5,6 @@ def create_booking(db: Session, request: BookingBase):
     booking = DbBooking(
         ride_id=request.ride_id,
         booker_id=request.booker_id,
-        start_time=request.start_time,
         pickup_location=request.pickup_location
        
         )

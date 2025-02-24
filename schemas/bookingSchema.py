@@ -4,7 +4,6 @@ from typing import Optional
 # BookingList inside listBookingResponse
 class BookingList(BaseModel):
     booking_id: int
-    start_time: datetime
     status: str
     created_at: datetime
     updated_at: datetime
@@ -15,7 +14,6 @@ class BookingBase(BaseModel):
     """Base schema for booking data shared by both creating and updating bookings."""
     ride_id: int
     booker_id: int
-    start_time: datetime
     pickup_location: str
 
     class Config:
@@ -29,8 +27,7 @@ class BookingResponse(BaseModel):
     status: str  
     created_at: datetime
     updated_at: datetime
-    start_time: datetime
-    
+    location: str
     message:str
     class Config:
         orm_mode = True
