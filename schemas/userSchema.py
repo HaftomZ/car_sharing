@@ -9,6 +9,18 @@ class Review(BaseModel):
     class Config():
         orm_mode = True
 
+class Car(BaseModel):
+    model : str
+    year : int
+    adult_seats : int
+    childern_seats : int
+    smoking_allowed : bool
+    wifi_available : bool
+    air_conditioning : bool
+    pet_friendly : bool
+    car_availability_status: str | None = None
+    class Config():
+        orm_mode = True
 
 class UserBase(BaseModel): 
     username: str
@@ -25,6 +37,7 @@ class userDisplay(BaseModel):
     about: str | None = None
     avatar: str | None = None
     phone_number: str | None = None
+    cars: List[Car] = []
     lefted_reviews: List[Review] = []
     class Config():
         orm_mode = True
