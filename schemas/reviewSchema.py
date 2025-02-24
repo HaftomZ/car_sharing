@@ -19,8 +19,9 @@ class ReviewBase(BaseModel):
 class ReviewDisplay(BaseModel):
     mark: int
     text_description: str
-    user_id: int
     creator_id: int
+    user_id: int
+
 
 
     class Config():
