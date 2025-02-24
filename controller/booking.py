@@ -31,4 +31,4 @@ def cancel_booking(db: Session, booking_id: int):
 def list_my_bookings(db: Session, user_id: int):
     return db.query(DbBooking).filter(DbBooking.booker_id == user_id).all()
   
-    
+
