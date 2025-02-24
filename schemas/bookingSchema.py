@@ -5,20 +5,18 @@ from typing import Optional
 class BookingList(BaseModel):
     booking_id: int
     start_time: datetime
-    end_time: datetime
     status: str
     created_at: datetime
     updated_at: datetime
-    location: str
+    pickup_location: str
     class Config:
         orm_mode = True
 class BookingBase(BaseModel):
     """Base schema for booking data shared by both creating and updating bookings."""
+    ride_id: int
     booker_id: int
-    car_id: int
     start_time: datetime
-    end_time: datetime
-    location: str
+    pickup_location: str
 
     class Config:
         orm_mode = True
@@ -32,8 +30,7 @@ class BookingResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     start_time: datetime
-    end_time: datetime
-    location: str
+    
     message:str
     class Config:
         orm_mode = True
