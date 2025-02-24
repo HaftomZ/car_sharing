@@ -12,6 +12,8 @@ class DbCar(Base):
     owner_id = Column(Integer, ForeignKey('users.id'))
     id = Column(Integer,primary_key=True, index=True)
     #owner_id = Column(Integer, ForeignKey('users.id'))
+    id = Column(Integer,primary_key=True, index=True)
+    owner_id = Column(Integer, ForeignKey('users.id'))
     model = Column(String)
     year = Column(Integer)
     adult_seats = Column(Integer)

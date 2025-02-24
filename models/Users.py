@@ -24,3 +24,4 @@ class DbUser(Base):
     cars = relationship("DbCar", back_populates="user")
     trip_booked = relationship("DbBooking", back_populates="user")
     lefted_reviews = relationship("DbReview", back_populates="user")
+    
