@@ -5,7 +5,8 @@ class TripBase(BaseModel):
     """Base schema for trip data shared by both creating and updating trips."""
     triper_id: int
     car_id: int
-    available_seats: int
+    available_adult_seats: int
+    available_children_seats: int
     status: str
     departure_location: str
     destination_location: str
