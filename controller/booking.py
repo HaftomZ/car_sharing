@@ -16,7 +16,6 @@ def create_booking(db: Session, request: BookingBase):
         status=booking.status,
         created_at=booking.created_at,
         updated_at=booking.updated_at,
-        start_time=booking.start_time,
         location=booking.pickup_location,
         message="Booking created successfully"
     )
