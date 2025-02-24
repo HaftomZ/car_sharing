@@ -37,7 +37,9 @@ class userDisplay(BaseModel):
     about: str | None = None
     avatar: str | None = None
     phone_number: str | None = None
+    left_reviews: List[Review] = []
     cars: List[Car] = []
     lefted_reviews: List[Review] = []
+
     class Config():
         orm_mode = True
