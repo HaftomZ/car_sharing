@@ -25,18 +25,18 @@ def get_review(id: int, db: Session = Depends(get_db)):
 
 
 # Read all reviews
-@router.get("/{id}", response_model=ReviewDisplay)
-def get_review(id: int, db: Session = Depends(get_db)):
-    return db_review.get_review(db, id)
+@router.get("/{user_id}", response_model=ReviewDisplay)
+def get_review(user_id: int, db: Session = Depends(get_db)):
+    return db_review.get_all_reviews(db, user_id)
 
 
 # Update review
 @router.post('/{id}/update')
-def update_review(id: int, request: ReviewBase, db: Session = Depends(get_db())):
+def update_review(id: int, request: ReviewBase, db: Session = Depends(get_db)):
     return db_review.update_review(db, id, request)
 
 
 # Delete review
 @router.get('/delete/{id}')
-def delete_review(id: int, db: Session = Depends(get_db())):
+def delete_review(id: int, db: Session = Depends(get_db)):
     return db_review.delete_review(db, id)
