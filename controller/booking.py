@@ -1,14 +1,13 @@
 from models.Booking import DbBooking
 from sqlalchemy.orm.session import Session
 from schemas.bookingSchema import BookingBase, BookingResponse
-#from schemas.userSchema import UserBase
 def create_booking(db: Session, request: BookingBase):
     booking = DbBooking(
-        start_time=request.start_time, 
-        end_time=request.end_time,
-        location=request.location,
+        ride_id=request.ride_id,
         booker_id=request.booker_id,
-        car_id=request.car_id
+        start_time=request.start_time,
+        pickup_location=request.pickup_location
+       
         )
     db.add(booking)
     db.commit()
@@ -17,9 +16,7 @@ def create_booking(db: Session, request: BookingBase):
         status=booking.status,
         created_at=booking.created_at,
         updated_at=booking.updated_at,
-        start_time=booking.start_time,
-        end_time=booking.end_time,
-        location=booking.location,
+        location=booking.pickup_location,
         message="Booking created successfully"
     )
 def cancel_booking(db: Session, booking_id: int):
@@ -33,4 +30,4 @@ def cancel_booking(db: Session, booking_id: int):
 def list_my_bookings(db: Session, user_id: int):
     return db.query(DbBooking).filter(DbBooking.booker_id == user_id).all()
   
-    
+

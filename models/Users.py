@@ -18,9 +18,12 @@ class DbUser(Base):
     about = Column(String)
     avatar = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
-
     cars = relationship("DbCar", back_populates="user")
     trip_booked = relationship("DbBooking", back_populates="user")
     lefted_reviews = relationship("DbReview", back_populates="user")
     average_rating = Column(Float)
     left_reviews = relationship("DbReview", back_populates="creator")
+    average_rating = Column(Float)
+    trip = relationship("DbTrip", back_populates="user")
+    
+
