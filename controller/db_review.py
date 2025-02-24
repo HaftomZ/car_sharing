@@ -1,13 +1,15 @@
 from sqlalchemy.orm.session import Session
 from schemas.reviewSchema import ReviewBase
 from models.Reviews import DbReview
+from sqlalchemy.sql import func
 
 
 def create_review(db: Session, request: ReviewBase):
     new_review = DbReview(
         mark=request.mark,
         text_description=request.text_description,
-        user_id=request.creator_id
+        user_id=request.user_id,
+        creator_id=request.creator_id
     )
     db.add(new_review)
     db.commit()
@@ -37,7 +39,11 @@ def update_review(db: Session, id: int, request: ReviewBase):
     review = db.query(DbReview).filter(DbReview.id == id)
     review.update({
         DbReview.mark: request.mark,
-        DbReview.text_description: request.text_description
+        DbReview.text_description: request.text_description,
+        DbReview.user_id: request.user_id,
+        DbReview.creator_id: request.creator_id,
+        DbReview.created_at: func.now()
+
     })
     db.commit()
     return 'ok'
