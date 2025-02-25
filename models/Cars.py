@@ -8,13 +8,13 @@ from models.Users import DbUser
 
 class DbCar(Base):
     __tablename__ ='cars'
+    id = Column(Integer,primary_key=True, index= True)
     owner_id = Column(Integer, ForeignKey('users.id'))
-    id = Column(Integer,primary_key=True, index=True)
 
     model = Column(String)
     year = Column(Integer)
     adult_seats = Column(Integer)
-    childern_seats = Column(Integer)
+    children_seats = Column(Integer)
     smoking_allowed = Column(Boolean)
     wifi_available = Column(Boolean)
     air_conditioning = Column(Boolean)

@@ -21,8 +21,5 @@ class ReviewDisplay(BaseModel):
     text_description: str
     creator_id: int
     user_id: int
-
-
-
     class Config():
         orm_mode = True
