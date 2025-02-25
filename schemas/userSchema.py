@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List
 
 class Booking(BaseModel):
@@ -37,13 +37,19 @@ class UserBase(BaseModel):
 
 class userDisplay(BaseModel):
     user_name: str
-    email: str
+    email: EmailStr
     about: str | None = None
     avatar: str | None = None
     phone_number: str | None = None
     left_reviews: List[Review] = []
-    cars: List[Car] = []
-    lefted_reviews: List[Review] = []
+    cars: List[Car] = [] 
 
     class Config():
         orm_mode = True
+
+    
+
+       
+
+
+
