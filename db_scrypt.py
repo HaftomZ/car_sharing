@@ -105,7 +105,7 @@ for row in rows:
 
 # SQL query to insert data
 insert_query_reviews_3 = '''
-INSERT INTO bookings (booking_id, booker_id, ride_id, status, adult_seats, children_seats, created_at, updated_at, pickup_location)
+INSERT INTO bookings (booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at, updated_at, pickup_location)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 '''
 
@@ -118,7 +118,7 @@ def generate_bookings():
     for i in range(1, 16):
         booking_id = i
         booker_id = (i % 5) + 1
-        ride_id = ((i + 1) % 3) + 1
+        trip_id = ((i + 1) % 3) + 1
         status = "Pending"
         adult_seats = ((i + 1) % 3) + 1
         children_seats = ((i + 1) % 3) + 1
@@ -129,7 +129,7 @@ def generate_bookings():
         created_at = base_date + timedelta(seconds=i * 15)  # Increments by 15 seconds
         updated_at = base_date + timedelta(hours=i)  # Increments by 10 seconds
 
-        bookings.append((booking_id, booker_id, ride_id, status, adult_seats, children_seats, created_at.strftime('%Y-%m-%d %H:%M:%S'), updated_at.strftime('%Y-%m-%d %H:%M:%S'), pickup_location))
+        bookings.append((booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at.strftime('%Y-%m-%d %H:%M:%S'), updated_at.strftime('%Y-%m-%d %H:%M:%S'), pickup_location))
 
     return bookings
 
@@ -156,7 +156,7 @@ for row in rows:
 
 # SQL query to insert data
 insert_query_reviews_4 = '''
-INSERT INTO cars (owner_id, id, model, year, adult_seats, childern_seats, smoking_allowed, wifi_available, air_conditioning, pet_friendly, car_status, car_availability_status)
+INSERT INTO cars (owner_id, id, model, year, adult_seats, children_seats, smoking_allowed, wifi_available, air_conditioning, pet_friendly, car_status, car_availability_status)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 '''
 
@@ -171,7 +171,7 @@ def generate_cars():
         year = 2010+i
         model = f'BMW {i}'
         adult_seats = ((i + 1) % 3) + 1
-        childern_seats = ((i + 1) % 3) + 1
+        children_seats = ((i + 1) % 3) + 1
         smoking_allowed = True
         wifi_available = True
         air_conditioning = True
@@ -179,7 +179,7 @@ def generate_cars():
         car_status = "approved"
         car_availability_status = "available"
 
-        cars.append((owner_id, id, model, year, adult_seats, childern_seats, smoking_allowed, wifi_available, air_conditioning, pet_friendly, car_status, car_availability_status))
+        cars.append((owner_id, id, model, year, adult_seats, children_seats, smoking_allowed, wifi_available, air_conditioning, pet_friendly, car_status, car_availability_status))
 
     return cars
 
@@ -207,8 +207,8 @@ for row in rows:
 
 # SQL query to insert data
 insert_query_reviews_5 = '''
-INSERT INTO trips (id, triper_id, car_id, departure_location, destination_location, departure_time, arrival_time, available_adult_seats, available_children_seats, status, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO trips (id, creator_id, car_id, departure_location, destination_location, departure_time, arrival_time, available_adult_seats, available_children_seats, status, passengers_count, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 '''
 
 
@@ -219,7 +219,7 @@ def generate_trips():
 
     for i in range(1, 16):
         id = i
-        triper_id = (i % 5) + 1
+        creator_id = (i % 5) + 1
         car_id = ((i + 1) % 3) + 1
         departure_location = f"Location {i}"
         destination_location = f"Location {i+3}"
@@ -227,12 +227,13 @@ def generate_trips():
         arrival_time = base_date + timedelta(hours=i, minutes=i)
         available_adult_seats = ((i + 1) % 3) + 1
         available_children_seats = ((i + 1) % 3) + 1
+        passengers_count = ((i + 1) % 3) + 1
         status = "Open"
         # Increment the base date by a few seconds
         created_at = base_date + timedelta(seconds=i * 15)  # Increments by 15 seconds
         updated_at = base_date + timedelta(hours=i)  # Increments by 10 seconds
 
-        trips.append((id, triper_id, car_id, departure_location, destination_location, departure_time.strftime('%Y-%m-%d %H:%M:%S'), arrival_time.strftime('%Y-%m-%d %H:%M:%S'), available_adult_seats, available_children_seats, status, created_at.strftime('%Y-%m-%d %H:%M:%S'), updated_at.strftime('%Y-%m-%d %H:%M:%S')))
+        trips.append((id, creator_id, car_id, departure_location, destination_location, departure_time.strftime('%Y-%m-%d %H:%M:%S'), arrival_time.strftime('%Y-%m-%d %H:%M:%S'), available_adult_seats, available_children_seats, status, passengers_count, created_at.strftime('%Y-%m-%d %H:%M:%S'), updated_at.strftime('%Y-%m-%d %H:%M:%S')))
 
     return trips
 

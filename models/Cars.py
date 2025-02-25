@@ -9,7 +9,7 @@ from models.Users import DbUser
 class DbCar(Base):
     __tablename__ ='cars'
     id = Column(Integer,primary_key=True, index= True)
-    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner_id = Column(Integer, ForeignKey('users.id'), ondelete="CASCADE")
 
     model = Column(String)
     year = Column(Integer)
