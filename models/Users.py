@@ -13,7 +13,7 @@ class DbUser(Base):
     __tablename__ = 'users'
     id = Column(Integer,primary_key=True, index=True)
     user_name = Column(String)
-    email = Column(String)
+    email = Column(String, unique=True)
     password = Column(String)
     about = Column(String)
     avatar = Column(String, nullable=True)
