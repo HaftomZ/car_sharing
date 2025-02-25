@@ -43,7 +43,6 @@ class userDisplay(BaseModel):
     phone_number: str | None = None
     left_reviews: List[Review] = []
     cars: List[Car] = []
-    lefted_reviews: List[Review] = []
     trip_booked: List[Booking] = []
     class Config():
         orm_mode = True
