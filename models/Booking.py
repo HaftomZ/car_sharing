@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, func
 from sqlalchemy.orm import relationship
 from config.db_connect import Base
 
@@ -14,13 +14,13 @@ class DbBooking(Base):
 
     booking_id = Column(Integer, primary_key=True, index=True)
     booker_id = Column(Integer, ForeignKey('users.id')) # passenger and driver
-    ride_id = Column(Integer, ForeignKey('trips.id')) 
+    trip_id = Column(Integer, ForeignKey('trips.id')) 
     status = Column(String, default="pending")  # e.g., pending, confirmed, canceled    
-    adult_seats = Column(Integer,  nullable=True)  # number of seats  
-    children_seats = Column(Integer, default= 0, nullable=True)  # number of seats
-    created_at = Column(DateTime, default=datetime.datetime.now)  # Created at timestamp
-    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # Updated at timestamp, auto-updated
-    pickup_location = Column(String, nullable=True)  # pick up Location 
+    adult_seats = Column(Integer,  nullable=True)  
+    children_seats = Column(Integer, default= 0, nullable=True)  
+    created_at =Column(String, default=func.now())  
+    updated_at = Column(String, default=func.now(), onupdate=func.now())  #  auto-updated?
+    pickup_location = Column(String, nullable=True)  
     #luggage = Column(String,default="no" nullable=True)  # luggage
     user = relationship("DbUser", back_populates="trip_booked")
     trip = relationship("DbTrip", back_populates="trip_booked")
