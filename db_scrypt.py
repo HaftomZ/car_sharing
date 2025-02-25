@@ -24,7 +24,7 @@ def generate_users():
         id = i
         user_name = f"name{i}"
         email = f"{user_name}@gmail.com"
-        password = Hash.bcrypt(f"name{i}_passqord")
+        password = Hash.bcrypt(f"name{i}_password")
         about = f'User number {i}'
         avatar = f'Nice picture {i}'
         phone_number = f'+31{i}3{i}34{i}'

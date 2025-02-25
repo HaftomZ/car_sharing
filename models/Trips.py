@@ -20,5 +20,5 @@ class DbTrip(Base):
     created_at = Column(DateTime, default=datetime.datetime.now) 
     updated_at = Column(DateTime, nullable=True)
     user = relationship("DbUser", back_populates="trip")
-    car = relationship("DbCar", back_populates="trip")
+    car = relationship("DbCar", back_populates="trip", cascade="all, delete-orphan")
     trip_booked = relationship("DbBooking", back_populates="trip")
