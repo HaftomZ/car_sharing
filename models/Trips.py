@@ -3,10 +3,6 @@ from enum import Enum
 from sqlalchemy.orm import relationship
 from config.db_connect import Base
 import datetime
-# class TripStatus(str,Enum):
-#     open = "open"
-#     closed = "closed"   
-#     canceled = "canceled"
 class DbTrip(Base):
     __tablename__ = "trips"
     

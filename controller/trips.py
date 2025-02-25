@@ -5,7 +5,8 @@ def create_Trips(db: Session, request: TripBase):
     trips = DbTrip(
         triper_id=request.triper_id,
         car_id=request.car_id,
-        available_seats=request.available_seats,
+        available_adult_seats=request.available_adult_seats,
+        available_children_seats=request.available_children_seats,
         status=request.status,
         departure_location=request.departure_location,
         destination_location=request.destination_location,

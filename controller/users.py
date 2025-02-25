@@ -40,11 +40,12 @@ def login_user(db: Session, email: str, password: str):
             detail="Invalid password! Incorrect password."
         )
 
-    return {
-        "user_name": user.user_name,
-        "email": user.email,
-        "message": "Login successful!"
-    }
+    # return {
+    #     "user_name": user.user_name,
+    #     "email": user.email,
+    #     "message": "Login successful!"
+    # }
+    return user 
 
 
 def update_user(db: Session, id:int, request: UserBase):
