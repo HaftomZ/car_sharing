@@ -13,8 +13,8 @@ class DbBooking(Base):
 
 
     booking_id = Column(Integer, primary_key=True, index=True)
-    booker_id = Column(Integer, ForeignKey('users.id'), ondelete="CASCADE") # passenger and driver
-    trip_id = Column(Integer, ForeignKey('trips.id'), ondelete="CASCADE")
+    booker_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE")) # passenger and driver
+    trip_id = Column(Integer, ForeignKey('trips.id', ondelete="CASCADE"))
     status = Column(String, default="pending")  # e.g., pending, confirmed, canceled    
     adult_seats = Column(Integer,  nullable=True)  
     children_seats = Column(Integer, default= 0, nullable=True)  

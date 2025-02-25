@@ -7,8 +7,8 @@ class DbTrip(Base):
     __tablename__ = "trips"
     
     id = Column(Integer, primary_key=True, index=True)
-    creator_id = Column(Integer, ForeignKey('users.id'), ondelete="CASCADE")
-    car_id = Column(Integer, ForeignKey('cars.id'), ondelete="CASCADE")
+    creator_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"))
+    car_id = Column(Integer, ForeignKey('cars.id', ondelete="CASCADE"))
     departure_location= Column(String)  
     destination_location= Column(String)
     departure_time = Column(DateTime) 
