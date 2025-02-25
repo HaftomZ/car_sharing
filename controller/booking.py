@@ -5,14 +5,19 @@ from models.Trips import DbTrip
 from fastapi import HTTPException, status
 def create_booking(db: Session, request: BookingBase):
     booking = DbBooking(
-        ride_id=request.ride_id,
+        trip_id=request.trip_id,
         booker_id=request.booker_id,
         pickup_location=request.pickup_location,
         adult_seats=request.adult_seats,
         children_seats=request.children_seats
         )
-    if request.ride_id not in [trip.id for trip in db.query(DbTrip).all()]:
+    trip = db.query(DbBooking).filter(DbBooking.trip_id == request.trip_id, DbBooking.booker_id == request.booker_id).first()
+    if trip:
+          raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= 'You have already boooked the trip!')
+    
+    if request.trip_id not in [trip.id for trip in db.query(DbTrip).all()]:
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'there is no such a trip!')
+    #todo: check for available seats first and then add the booking.
     db.add(booking)
     db.commit()
     db.refresh(booking)
@@ -20,7 +25,7 @@ def create_booking(db: Session, request: BookingBase):
         status=booking.status,
         created_at=booking.created_at,
         updated_at=booking.updated_at,
-        message=f"Trip {booking.ride_id} is booked successfully"
+        message=f"Trip {booking.trip_id} is booked successfully"
     )
 def cancel_booking(db: Session, booking_id: int):
         booking = db.query(DbBooking).filter(DbBooking.booking_id == booking_id).first()
@@ -34,7 +39,7 @@ def update_my_bookings(db: Session, booking_id: int, request: BookingBase):
     booking = db.query(DbBooking).filter(DbBooking.booking_id == booking_id).first()
     if not booking:
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'Booking not found!')
-    booking.ride_id = request.ride_id
+    booking.trip_id = request.trip_id
     booking.booker_id = request.booker_id
     booking.pickup_location = request.pickup_location
     booking.adult_seats = request.adult_seats
@@ -54,9 +59,5 @@ def list_my_bookings(db: Session, user_id: int):
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'You donot have any bookings!')
      
     return lists
-        #  listBookingResponse(
-        #  booking_list =[].map(lambda booking: BookingList(
-        #       lists.booking_id, lists.status, lists.created_at, lists.updated_at, lists.pickup_location
-        #  )))
-  
+    
 

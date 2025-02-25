@@ -24,3 +24,4 @@ class DbUser(Base):
     left_reviews = relationship("DbReview", back_populates="creator")
     average_rating = Column(Float)
     trip = relationship("DbTrip", back_populates="user")
+
