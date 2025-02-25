@@ -8,6 +8,7 @@ from sqlalchemy.orm import relationship
 # from models.Booking import DbBooking
 
 
+
 class DbUser(Base):
     __tablename__ = 'users'
     id = Column(Integer,primary_key=True, index=True)
@@ -17,10 +18,9 @@ class DbUser(Base):
     about = Column(String)
     avatar = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
-    average_rating = Column(Float)
-    # driver_license= Column(Boolean)
-    cars = relationship("DbCar", back_populates='user')
-    trip = relationship("DbTrip", back_populates="user")
+    cars = relationship("DbCar", back_populates="user")
     trip_booked = relationship("DbBooking", back_populates="user")
-    lefted_reviews = relationship("DbReview", back_populates="user")
-    
+    average_rating = Column(Float)
+    left_reviews = relationship("DbReview", back_populates="creator")
+    average_rating = Column(Float)
+    trip = relationship("DbTrip", back_populates="user")

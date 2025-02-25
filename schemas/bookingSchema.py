@@ -1,19 +1,10 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
-# BookingList inside listBookingResponse
-class BookingList(BaseModel):
 
-    booking_id: int
-    status: str
-    created_at: datetime
-    updated_at: datetime
-    pickup_location: str
-    class Config:
-        orm_mode = True
 class BookingBase(BaseModel):
     """Base schema for booking data shared by both creating and updating bookings."""
-    ride_id: int
+    trip_id: int
     booker_id: int
     pickup_location: str
     adult_seats: int
@@ -23,7 +14,13 @@ class BookingBase(BaseModel):
     class Config:
         orm_mode = True
 class listBookingResponse(BaseModel):
-    booking_list: list[BookingList]=[]
+    booking_id: int
+    trip_id: int
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    pickup_location: str
+    
      
     class Config:
         orm_mode = True

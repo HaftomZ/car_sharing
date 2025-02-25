@@ -13,7 +13,7 @@ class DbCar(Base):
     model = Column(String)
     year = Column(Integer)
     adult_seats = Column(Integer)
-    childern_seats = Column(Integer)
+    children_seats = Column(Integer)
     smoking_allowed = Column(Boolean)
     wifi_available = Column(Boolean)
     air_conditioning = Column(Boolean)

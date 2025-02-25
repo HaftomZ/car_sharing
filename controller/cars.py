@@ -9,7 +9,7 @@ def create_car(db: Session, request: CarBase , user_id: int):
         model = request.model,
         year = request.year,
         adult_seats = request.adult_seats,
-        childern_seats = request.childern_seats,
+        children_seats = request.children_seats,
         smoking_allowed = request.smoking_allowed,
         wifi_available = request.wifi_available,
         air_conditioning = request.air_conditioning,
@@ -25,7 +25,7 @@ def create_car(db: Session, request: CarBase , user_id: int):
 def get_all_user_cars(db: Session, user_id: int):
    cars=  db.query(DbCar).filter(DbCar.owner_id == user_id).all()
    if not cars:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= 'There are no cars found!')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='There are no cars found!')
    return cars
 
 #update car details
@@ -38,7 +38,7 @@ def update_user_car(db: Session, user_id: int , car_id: int, request: CarBase):
         DbCar.model : request.model,
         DbCar.year : request.year,
         DbCar.adult_seats : request.adult_seats,
-        DbCar.childern_seats : request.childern_seats,
+        DbCar.children_seats : request.children_seats,
         DbCar.smoking_allowed : request.smoking_allowed,
         DbCar.wifi_available : request.wifi_available,
         DbCar.air_conditioning : request.air_conditioning,
