@@ -11,11 +11,11 @@ class DbReview (Base):
     __tablename__ = 'reviews'
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer)
-    creator_id = Column(Integer, ForeignKey('users.id'))
+    creator_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"))
     created_at = Column(String, default=func.now())
     mark = Column(Integer)
     text_description = Column(String)
-    creator = relationship("DbUser", foreign_keys=[creator_id], back_populates="left_reviews")
+    creator = relationship("DbUser", back_populates="left_reviews")
 
 
 
