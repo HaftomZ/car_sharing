@@ -15,7 +15,7 @@ class DbTrip(Base):
     arrival_time = Column(DateTime, nullable=True)
     available_adult_seats = Column(Integer)
     available_children_seats = Column(Integer)
-    #passengers = Column(list, nullable=True)  # number of passengers
+    passengers_count = Column(Integer, nullable=True)
     status = Column(String, default="Scheduled", nullable=True) # scheduled, ongoing, completed, or cancelled
     created_at = Column(DateTime, default=datetime.datetime.now) 
     updated_at = Column(DateTime, nullable=True)

@@ -4,7 +4,7 @@ class CarBase(BaseModel):
     model : str
     year : int
     adult_seats : int
-    childern_seats : int
+    children_seats : int
     smoking_allowed : bool
     wifi_available : bool
     air_conditioning : bool
@@ -26,7 +26,7 @@ class CarDisplay(BaseModel):
     model : str
     year : int
     adult_seats : int
-    childern_seats : int
+    children_seats : int
     smoking_allowed : bool
     wifi_available : bool
     air_conditioning : bool
