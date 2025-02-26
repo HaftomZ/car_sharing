@@ -20,7 +20,8 @@ class DbBooking(Base):
     children_seats = Column(Integer, default= 0, nullable=True)  
     created_at =Column(String, default=func.now())  
     updated_at = Column(String, default=func.now(), onupdate=func.now())  #  auto-updated?
-    pickup_location = Column(String, nullable=True)  
+    pickup_location = Column(String, nullable=True)
+    end_location = Column(String, nullable=True)
     #luggage = Column(String,default="no" nullable=True)  # luggage
-    user = relationship("DbUser", back_populates="trip_booked", cascade="all, delete-orphan")
-    trip = relationship("DbTrip", back_populates="trip_booked", cascade="all, delete-orphan")
+    user = relationship("DbUser", back_populates="trip_booked")
+    trip = relationship("DbTrip", back_populates="trip_booked")

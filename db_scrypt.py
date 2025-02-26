@@ -68,7 +68,7 @@ def generate_reviews():
         user_id = (i % 3) + 1
         creator_id = ((i + 1) % 3) + 1
         mark = (i % 5) + 1
-        text_description = f'Review {i + 1}: ' + ('Really good' if mark == 5 else
+        text_description = f'Review {i}: ' + ('Really good' if mark == 5 else
                                                   'Nice' if mark == 4 else
                                                   'Neutral' if mark == 3 else
                                                   'Bad' if mark == 2 else 'Really bad')
@@ -105,8 +105,8 @@ for row in rows:
 
 # SQL query to insert data
 insert_query_reviews_3 = '''
-INSERT INTO bookings (booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at, updated_at, pickup_location)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO bookings (booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at, updated_at, pickup_location, end_location)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 '''
 
 
@@ -122,14 +122,15 @@ def generate_bookings():
         status = "Pending"
         adult_seats = ((i + 1) % 3) + 1
         children_seats = ((i + 1) % 3) + 1
-        pickup_location = f'Location {i}'
+        pickup_location = f'Pickup location {i}'
+        end_location = f'End location {i}'
 
 
         # Increment the base date by a few seconds
         created_at = base_date + timedelta(seconds=i * 15)  # Increments by 15 seconds
         updated_at = base_date + timedelta(hours=i)  # Increments by 10 seconds
 
-        bookings.append((booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at.strftime('%Y-%m-%d %H:%M:%S'), updated_at.strftime('%Y-%m-%d %H:%M:%S'), pickup_location))
+        bookings.append((booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at.strftime('%Y-%m-%d %H:%M:%S'), updated_at.strftime('%Y-%m-%d %H:%M:%S'), pickup_location, end_location))
 
     return bookings
 

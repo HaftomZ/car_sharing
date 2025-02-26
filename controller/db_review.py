@@ -7,9 +7,9 @@ from sqlalchemy.sql import func
 
 def create_review(db: Session, request: ReviewBase):
     new_review = DbReview(
-        mark=request.mark,
+        rating=request.rating,
         text_description=request.text_description,
-        user_id=request.user_id,
+        receiver_id=request.receiver_id,
         creator_id=request.creator_id
     )
     db.add(new_review)
@@ -26,11 +26,11 @@ def get_review(db: Session, id: int):
     return review
 
 
-def get_all_reviews(db: Session, user_id: int):
-    review = db.query(DbReview).filter(DbReview.user_id == user_id).all()
+def get_all_reviews_received(db: Session, receiver_id: int):
+    review = db.query(DbReview).filter(DbReview.receiver_id == receiver_id).all()
     if not review:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                             detail=f'Review for user_id {user_id} does not exist!')
+                             detail=f'Review for user_id {receiver_id} does not exist!')
     return review
 
 
@@ -48,7 +48,7 @@ def update_review(db: Session, id: int, request: ReviewBase):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                              detail=f'Review with id {id} does not exist!')
     review.update({
-        DbReview.mark: request.mark,
+        DbReview.rating: request.rating,
         DbReview.text_description: request.text_description,
         DbReview.created_at: func.now()
     })
