@@ -10,12 +10,13 @@ from sqlalchemy.orm import relationship
 class DbReview (Base):
     __tablename__ = 'reviews'
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer)
+    receiver_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"))
     creator_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"))
     created_at = Column(String, default=func.now())
-    mark = Column(Integer)
-    text_description = Column(String)
-    creator = relationship("DbUser", back_populates="left_reviews")
+    rating = Column(Integer)
+    text_description = Column(String, nullable=True)
+    creator = relationship("DbUser", back_populates="left_reviews", foreign_keys=[creator_id])
+    receiver = relationship("DbUser", back_populates="received_reviews", foreign_keys=[receiver_id])
 
 
 
