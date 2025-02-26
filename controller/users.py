@@ -5,6 +5,11 @@ from models.Users import DbUser
 from fastapi import HTTPException, status
 
 def create_user(db: Session, request: UserBase):
+    if len(request.about) >= 50:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="About section cannot be more than 50 characters!."
+        )
     existing_user = db.query(DbUser).filter(DbUser.email == request.email).first()
     
     if existing_user:
@@ -46,7 +51,7 @@ def login_user(db: Session, email: str, password: str):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid password! Incorrect password."
         )
-   
+       
     return user 
 
 

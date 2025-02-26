@@ -35,7 +35,7 @@ def generate_users():
 data_1 = generate_users()
 
 # Insert data into the table
-cursor.executemany(insert_query_users, data_1)
+cursor.executant(insert_query_users, data_1)
 
 # Commit the transaction to save the changes
 conn.commit()
@@ -105,9 +105,10 @@ for row in rows:
 
 # SQL query to insert data
 insert_query_reviews_3 = '''
-INSERT INTO bookings (booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at, updated_at, pickup_location, end_location)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-'''
+INSERT INTO bookings (booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at, updated_at, pickup_location)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+
 
 
 # Function to generate a list of reviews with different date values
@@ -130,7 +131,8 @@ def generate_bookings():
         created_at = base_date + timedelta(seconds=i * 15)  # Increments by 15 seconds
         updated_at = base_date + timedelta(hours=i)  # Increments by 10 seconds
 
-        bookings.append((booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at.strftime('%Y-%m-%d %H:%M:%S'), updated_at.strftime('%Y-%m-%d %H:%M:%S'), pickup_location, end_location))
+        bookings.append((booking_id, booker_id, trip_id, status, adult_seats, children_seats, created_at.strftime('%Y-%m-%d %H:%M:%S'), updated_at.strftime('%Y-%m-%d %H:%M:%S'), pickup_location))
+
 
     return bookings
 

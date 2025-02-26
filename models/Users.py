@@ -7,8 +7,6 @@ from sqlalchemy.orm import relationship
 # from models.Reviews import DbReview
 # from models.Booking import DbBooking
 
-
-
 class DbUser(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True)
