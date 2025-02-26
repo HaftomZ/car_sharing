@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime,func
 from enum import Enum
 from sqlalchemy.orm import relationship
 from config.db_connect import Base
@@ -17,7 +17,7 @@ class DbTrip(Base):
     available_children_seats = Column(Integer)
     passengers_count = Column(Integer, nullable=True)
     status = Column(String, default="Scheduled", nullable=True) # scheduled, ongoing, completed, or cancelled
-    created_at = Column(DateTime, default=datetime.datetime.now) 
+    created_at = Column(DateTime, default=datetime.datetime.now()) 
     updated_at = Column(DateTime, nullable=True)
     user = relationship("DbUser", back_populates="trip")
     car = relationship("DbCar", back_populates="trip")
