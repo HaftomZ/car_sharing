@@ -53,7 +53,7 @@ for row in rows:
 
 # SQL query to insert data
 insert_query_reviews = '''
-INSERT INTO reviews (id, user_id, creator_id, created_at, mark, text_description)
+INSERT INTO reviews (id, receiver_id, creator_id, created_at, rating, text_description)
 VALUES (?, ?, ?, ?, ?, ?)
 '''
 
@@ -65,19 +65,19 @@ def generate_reviews():
 
     for i in range(1, 16):
         review_id = i
-        user_id = (i % 3) + 1
+        receiver_id = (i % 3) + 1
         creator_id = ((i + 1) % 3) + 1
-        mark = (i % 5) + 1
-        text_description = f'Review {i}: ' + ('Really good' if mark == 5 else
-                                                  'Nice' if mark == 4 else
-                                                  'Neutral' if mark == 3 else
-                                                  'Bad' if mark == 2 else 'Really bad')
+        rating = (i % 5) + 1
+        text_description = f'Review {i}: ' + ('Really good' if rating == 5 else
+                                                  'Nice' if rating == 4 else
+                                                  'Neutral' if rating == 3 else
+                                                  'Bad' if rating == 2 else 'Really bad')
 
         # Increment the base date by a few seconds for each review
         review_date = base_date + timedelta(seconds=i * 15)  # Increments by 15 seconds
 
         reviews.append(
-            (review_id, user_id, creator_id, review_date.strftime('%Y-%m-%d %H:%M:%S'), mark, text_description))
+            (review_id, receiver_id, creator_id, review_date.strftime('%Y-%m-%d %H:%M:%S'), rating, text_description))
 
     return reviews
 
