@@ -13,3 +13,5 @@ schemas/__pycache__/userSchema.cpython-312.pyc
 views/__pycache__/review_routers.cpython-312.pyc
 
 
+__pycache__/
+*.pyc

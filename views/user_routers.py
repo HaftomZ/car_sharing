@@ -24,7 +24,6 @@ def get_user(email: str, password: str, db: Session = Depends(get_db)):
 
 @router.put('/{id}/update')
 def update_user(id: int, request: UserBase, db: Session = Depends(get_db)):
-    userDisplay.left_reviews    
     return users.update_user(db, id, request)
 
 @router.delete('/delete/{id}')
