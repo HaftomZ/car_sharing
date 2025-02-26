@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import List
 
 class Booking(BaseModel):
@@ -33,6 +33,14 @@ class UserBase(BaseModel):
     about: str
     phone_number: str
     avatar: str
+
+
+    @field_validator("about")
+    @classmethod
+    def validate_about_length(cls, value):
+        if len(value) >= 300:
+            raise ValueError("About section cannot exceed 300 characters.")
+        return value
 
 
 class userDisplay(BaseModel):
