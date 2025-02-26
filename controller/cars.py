@@ -8,8 +8,7 @@ def create_car(db: Session, request: CarBase , user_id: int):
     new_car=DbCar(
         model = request.model,
         year = request.year,
-        adult_seats = request.adult_seats,
-        children_seats = request.children_seats,
+        total_seats = request.total_seats,
         smoking_allowed = request.smoking_allowed,
         wifi_available = request.wifi_available,
         air_conditioning = request.air_conditioning,
@@ -37,8 +36,7 @@ def update_user_car(db: Session, user_id: int , car_id: int, request: CarBase):
     car.update({ 
         DbCar.model : request.model,
         DbCar.year : request.year,
-        DbCar.adult_seats : request.adult_seats,
-        DbCar.children_seats : request.children_seats,
+        DbCar.total_seats : request.total_seats,
         DbCar.smoking_allowed : request.smoking_allowed,
         DbCar.wifi_available : request.wifi_available,
         DbCar.air_conditioning : request.air_conditioning,
@@ -68,4 +66,4 @@ def update_car_availability_status(db: Session, user_id: int , car_id: int, stat
        DbCar.car_availability_status : status
         })
     db.commit()
-    return f'Your car availability status has been updated successfully!'
+    return f'Your car availability status has been updated successfully to {status}'
