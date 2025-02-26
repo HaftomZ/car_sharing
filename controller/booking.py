@@ -8,6 +8,7 @@ def create_booking(db: Session, request: BookingBase):
         trip_id=request.trip_id,
         booker_id=request.booker_id,
         pickup_location=request.pickup_location,
+        end_location=request.end_location,
         adult_seats=request.adult_seats,
         children_seats=request.children_seats
         )
@@ -42,6 +43,7 @@ def update_my_bookings(db: Session, booking_id: int, request: BookingBase):
     booking.trip_id = request.trip_id
     booking.booker_id = request.booker_id
     booking.pickup_location = request.pickup_location
+    booking.end_location = request.end_location
     booking.adult_seats = request.adult_seats
     booking.children_seats = request.children_seats
     db.commit()

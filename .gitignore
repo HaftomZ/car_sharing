@@ -4,11 +4,7 @@ lib
 hrin.db
 .vscode
 .idea
+.Db_Store
 
-models/__pycache__/Reviews.cpython-312.pyc
-models/__pycache__/Users.cpython-312.pyc
-schemas/__pycache__/reviewSchema.cpython-312.pyc
-schemas/__pycache__/userSchema.cpython-312.pyc
-views/__pycache__/review_routers.cpython-312.pyc
-
-
+__pycache__/
+*.pyc

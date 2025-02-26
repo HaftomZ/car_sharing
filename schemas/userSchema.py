@@ -9,7 +9,7 @@ class Booking(BaseModel):
         orm_mode = True
 # Review inside userDisplay
 class Review(BaseModel):
-    mark: int
+    rating: int
     text_description: str
     class Config():
         orm_mode = True
@@ -56,6 +56,7 @@ class userDisplay(BaseModel):
     avatar: str | None = None
     phone_number: str | None = None
     left_reviews: List[Review] = []
+    received_reviews: List[Review] = []
     cars: List[Car] = []
     trip: List[Trip] = []
     trip_booked: List[Booking] = []
