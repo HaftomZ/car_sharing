@@ -9,6 +9,7 @@ def create_booking(db: Session, trip_id: int,booker_id:int,request: BookingBase)
         trip_id=trip_id,
         booker_id=booker_id,
         pickup_location=request.pickup_location,
+        end_location=request.end_location,
         adult_seats=request.adult_seats,
         children_seats=request.children_seats
         )
@@ -46,6 +47,7 @@ def update_booking_status(db: Session, user_id: int, trip_id:int, booking_id: in
     passenger_booking_id.update({
          DbBooking.status :booking_status
         })
+
     db.commit()
     return f"status of booking id {booking_id} is updated successfully to {booking_status}"
 def update_my_bookings(db: Session, booker_id: int,booking_id: int, request: BookingBase):

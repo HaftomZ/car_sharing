@@ -5,6 +5,13 @@ from models.Users import DbUser
 from fastapi import HTTPException, status
 
 def create_user(db: Session, request: UserBase):
+    existing_user = db.query(DbUser).filter(DbUser.email == request.email).first()
+    
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists. Please choose a different email!."
+        )
     new_user = DbUser(
         user_name = request.username,
         email = request.email,
@@ -22,7 +29,7 @@ def create_user(db: Session, request: UserBase):
 def get_all_users(db:Session):
     all_users = db.query(DbUser).all()
     if not all_users:
-        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'there are no users exist!')
+        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'there are no users found!')
     return all_users
 
 def login_user(db: Session, email: str, password: str):
@@ -31,7 +38,7 @@ def login_user(db: Session, email: str, password: str):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Invalid data! User does not exist."
+            detail="Invalid Email! Create an account first!."
         )
 
     if not Hash.verify(user.password, password):  
@@ -39,12 +46,7 @@ def login_user(db: Session, email: str, password: str):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid password! Incorrect password."
         )
-
-    # return {
-    #     "user_name": user.user_name,
-    #     "email": user.email,
-    #     "message": "Login successful!"
-    # }
+   
     return user 
 
 

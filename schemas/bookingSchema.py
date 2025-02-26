@@ -12,6 +12,7 @@ class Trip_Details_In_Booking(BaseModel):
         orm_mode = True
 class BookingBase(BaseModel):
     pickup_location: str
+    end_location: str
     adult_seats: int
     children_seats: Optional[int]
 
@@ -26,6 +27,8 @@ class listBookingResponse(BaseModel):
     updated_at: str
     pickup_location: str
     trip: Trip_Details_In_Booking 
+    end_location: str
+    
      
     class Config:
         orm_mode = True
