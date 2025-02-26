@@ -10,7 +10,7 @@ def create_user(db: Session, request: UserBase):
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already exists. Please choose a different email."
+            detail="Email already exists. Please choose a different email!."
         )
     new_user = DbUser(
         user_name = request.username,
@@ -38,7 +38,7 @@ def login_user(db: Session, email: str, password: str):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Invalid data! Email does not exist."
+            detail="Invalid Email! Create an account first!."
         )
 
     if not Hash.verify(user.password, password):  
