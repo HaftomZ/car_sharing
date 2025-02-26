@@ -17,9 +17,10 @@ class BookingStatus(str,Enum):
 def create_booking(req: BookingBase, booker_id:int, trip_id: int,db: Session= Depends(get_db)):
     return booking.create_booking(db,  booker_id, trip_id,req)
 
-@router.delete('/cancel_booking/{booking_id}')
-def cancel_booking(booking_id: int, db: Session= Depends(get_db)):
-    return booking.cancel_booking(db, booking_id)
+@router.delete('/cancel_booking/{booker_id}/{booking_id}')
+def cancel_booking(booker_id:int, booking_id: int, db: Session= Depends(get_db)):
+    return booking.cancel_booking(db, booker_id,booking_id)
+
 @router.put('/update_booking_status/{user_id}/{trip_id}/{booking_id}/{booking_status}')
 def update_booking_status(user_id: int, trip_id:int, booking_id: int, booking_status: BookingStatus, db: Session= Depends(get_db)):
    return booking.update_booking_status(db,user_id,trip_id,booking_id,booking_status.value)
