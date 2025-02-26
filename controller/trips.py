@@ -4,6 +4,7 @@ from schemas.tripSchema import TripBase
 from fastapi import HTTPException , status
 import datetime
 from sqlalchemy import  func 
+from controller import cars
 
 def create_trip(db: Session, request: TripBase, creator_id: int, car_id: int):
     #think about arrival time
@@ -78,6 +79,16 @@ def update_trip_status(db: Session, user_id: int , trip_id: int, status: str):
     trip.update({ 
        DbTrip.status : status
        })
+    car_id = trip.first().car_id
+
+    car_status = ""
+    if status == "Ongoing":
+        car_status = "In Use"
+        cars.update_car_availability_status(db, user_id, car_id , car_status)
+
+    elif status == "Cancelled" or status == "Scheduled" or status == "Completed":
+        car_status = "Available"
+        cars.update_car_availability_status(db, user_id, car_id , "Available")
     db.commit()
-    return f'Your trip status has been updated successfully to {status}'
+    return f'Your trip status has been updated to {status} and your car availability status has been updated to {car_status}'
     
