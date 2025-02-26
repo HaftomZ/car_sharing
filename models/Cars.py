@@ -10,7 +10,6 @@ class DbCar(Base):
     __tablename__ ='cars'
     id = Column(Integer,primary_key=True, index= True)
     owner_id = Column(Integer, ForeignKey('users.id'))
-
     model = Column(String)
     year = Column(Integer)
     adult_seats = Column(Integer)
