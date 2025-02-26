@@ -1,24 +1,41 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
+from typing import List
+
 class TripBase(BaseModel):
-    """Base schema for trip data shared by both creating and updating trips."""
-    triper_id: int
-    car_id: int
-    available_seats: int
-    status: str
     departure_location: str
     destination_location: str
     departure_time: datetime
+    available_adult_seats: int
+    available_children_seats: int
+    cost: float
+
+class Booking(BaseModel):
+    booker_id: int 
+    status: str
+    adult_seats: int
+    children_seats: int 
+    pickup_location: str
     class Config:
         orm_mode =True
-class TripResponse(BaseModel):
-    """Schema for the response data after trip has been created or updated."""  
-    status: str
-    created_at: datetime
-    updated_at: datetime
+
+class TripDisplay(BaseModel): 
+    id: int 
+    car_id: int
+    departure_location: str
+    destination_location: str
     departure_time: datetime
-    message: str
+    arrival_time: datetime | None = None
+    available_adult_seats: int
+    available_children_seats: int
+    cost: float
+    passengers_count: int | None = None
+    status: str | None = None
+    created_at: str
+    updated_at: str | None = None
+    trip_booked: List[Booking] = []
+   # trip_booked  : Booking
     class Config:
         orm_mode =True
     

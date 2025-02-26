@@ -7,6 +7,8 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./hrin.db"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
+# with engine.connect() as connection:
+#     connection.execute("PRAGMA foreign_keys = ON;")
 
 sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

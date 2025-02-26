@@ -4,5 +4,7 @@ lib
 hrin.db
 .vscode
 .idea
-.vscode
-hrin.db
+.Db_Store
+
+__pycache__/
+*.pyc

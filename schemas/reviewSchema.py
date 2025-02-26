@@ -4,21 +4,22 @@ from pydantic import BaseModel
 # User inside ReviewDisplay
 class User(BaseModel):
     id: int
-    username: str
+    user_name: str
     class Config():
         orm_mode = True
 
 
 class ReviewBase(BaseModel):
-    mark: int
-    text_description: str
+    rating: int
+    text_description: str | None = None
     creator_id: int
+    receiver_id: int
 
 
 class ReviewDisplay(BaseModel):
-    mark: int
+    rating: int
     text_description: str
-    user: User
-
+    creator_id: int
+    receiver_id: int
     class Config():
         orm_mode = True

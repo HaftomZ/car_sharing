@@ -1,28 +1,29 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime , func , Float
 from enum import Enum
 from sqlalchemy.orm import relationship
 from config.db_connect import Base
 import datetime
-# class TripStatus(str,Enum):
-#     open = "open"
-#     closed = "closed"   
-#     canceled = "canceled"
 class DbTrip(Base):
     __tablename__ = "trips"
     
     id = Column(Integer, primary_key=True, index=True)
-    triper_id = Column(Integer, ForeignKey('users.id'))  # driver only
-    car_id = Column(Integer, ForeignKey('cars.id'))  
-    departure_location= Column(String, nullable=True)  
-    destination_location= Column(String, nullable=True)
-    departure_time = Column(DateTime, default=datetime.datetime.now)  # start time
-    arrival_time = Column(DateTime, nullable=True)  # end time
-    available_adult_seats = Column(Integer, nullable=True)  # available seats
-    available_children_seats = Column(Integer, nullable=True)  # available seats
-    #passengers = Column(list, nullable=True)  # number of passengers
-    status = Column(String, default="open", nullable=True)  # e.g. open, closed, canceled
-    created_at = Column(DateTime, default=datetime.datetime.now)  # Created at timestamp
-    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)  # Updated at timestamp, auto-updated
+    creator_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"))
+    car_id = Column(Integer, ForeignKey('cars.id', ondelete="CASCADE"))
+    departure_location= Column(String)  
+    destination_location= Column(String)
+    departure_time = Column(DateTime) 
+    arrival_time = Column(DateTime, nullable=True)
+    available_adult_seats = Column(Integer)
+    available_children_seats = Column(Integer)
+    cost = Column(Float)
+    passengers_count = Column(Integer, nullable=True)
+    status = Column(String, default="Scheduled", nullable=True) # scheduled, ongoing, completed, or cancelled
+
+
+    created_at = Column(String, default=func.now()) 
+    updated_at = Column(String, nullable=True)
+
     user = relationship("DbUser", back_populates="trip")
     car = relationship("DbCar", back_populates="trip")
     trip_booked = relationship("DbBooking", back_populates="trip")
