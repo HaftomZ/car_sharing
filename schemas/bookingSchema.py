@@ -7,6 +7,7 @@ class BookingBase(BaseModel):
     trip_id: int
     booker_id: int
     pickup_location: str
+    end_location: str
     adult_seats: int
     children_seats: Optional[int]
 
@@ -20,6 +21,7 @@ class listBookingResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     pickup_location: str
+    end_location: str
     
      
     class Config:

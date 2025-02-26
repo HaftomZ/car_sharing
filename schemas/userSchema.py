@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import List
+from datetime import datetime
 
 class Booking(BaseModel):
     booking_id: int
@@ -8,8 +9,21 @@ class Booking(BaseModel):
         orm_mode = True
 # Review inside userDisplay
 class Review(BaseModel):
-    mark: int
+    rating: int
     text_description: str
+    class Config():
+        orm_mode = True
+
+class Trip(BaseModel):
+    departure_location: str  
+    destination_location: str
+    departure_time : datetime
+    arrival_time: datetime | None = None
+    available_adult_seats: int
+    available_children_seats: int
+    cost: float
+    passengers_count : int | None = None
+    status : str
     class Config():
         orm_mode = True
 
@@ -50,7 +64,9 @@ class userDisplay(BaseModel):
     avatar: str | None = None
     phone_number: str | None = None
     left_reviews: List[Review] = []
+    received_reviews: List[Review] = []
     cars: List[Car] = []
+    trip: List[Trip] = []
     trip_booked: List[Booking] = []
 
     class Config():

@@ -26,9 +26,9 @@ def get_review(id: int, db: Session = Depends(get_db)):
 
 
 # Read all reviews left for specific user_id
-@router.get("/{user_id}/all", response_model=List[ReviewDisplay])
-def get_review(user_id: int, db: Session = Depends(get_db)):
-    return db_review.get_all_reviews(db, user_id)
+@router.get("/received/{receiver_id}/all", response_model=List[ReviewDisplay])
+def get_review(receiver_id: int, db: Session = Depends(get_db)):
+    return db_review.get_all_reviews_received(db, receiver_id)
 
 
 # Read all reviews left by specific creator_id
