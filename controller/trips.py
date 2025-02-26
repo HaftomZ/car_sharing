@@ -6,17 +6,26 @@ import datetime
 from sqlalchemy import  func 
 from controller import cars
 
+def trip_duration(departure_time: datetime, arrival_time: datetime):
+    duration = arrival_time - departure_time
+    return duration.total_seconds() / 3600
+
 def create_trip(db: Session, request: TripBase, creator_id: int, car_id: int):
-    #think about arrival time
+    
+    if request.departure_time >= request.arrival_time:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The arrival time should be after the departure time')
+    
     trip = DbTrip(
         creator_id = creator_id,
         car_id = car_id,
-        departure_location = request.departure_location,
-        destination_location = request.destination_location,
+        departure_location = request.departure_location.lower(),
+        destination_location = request.destination_location.lower(),
         departure_time = request.departure_time,
+        arrival_time = request.arrival_time,
         available_adult_seats = request.available_adult_seats,
         available_children_seats = request.available_children_seats,
-        cost = request.cost
+        cost = request.cost,
+        duration = trip_duration(request.departure_time, request.arrival_time)
         )
     db.add(trip)
     db.commit()
@@ -29,14 +38,19 @@ def update_trip(db: Session,request: TripBase, creator_id: int , trip_id: int):
     if not trip.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'There is no trip with id {trip_id}')
     
+    if request.departure_time >= request.arrival_time:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The arrival time should be after the departure time')
+
     trip.update({ 
-        DbTrip.departure_location : request.departure_location,
-        DbTrip.destination_location : request.destination_location,
+        DbTrip.departure_location : request.departure_location.lower(),
+        DbTrip.destination_location : request.destination_location.lower(),
         DbTrip.departure_time : request.departure_time,
+        DbTrip.arrival_time : request.arrival_time,
         DbTrip.available_adult_seats : request.available_adult_seats,
         DbTrip.available_children_seats : request.available_children_seats,
         DbTrip.cost: request.cost,
-        DbTrip.updated_at : func.now()
+        DbTrip.updated_at : func.now(),
+        DbTrip.duration: trip_duration(request.departure_time, request.arrival_time)
         })
     db.commit()
     return 'Your trip details has been updated successfully!'
@@ -61,8 +75,8 @@ def get_all_user_trips(db: Session, user_id: int):
 #search for trip
 def search_trip(db: Session, departure_location: str, destination_location: str,
                 departure_time: datetime, available_adult_seats: int, available_children_seats: int):
-    trips=  db.query(DbTrip).filter(DbTrip.departure_location == departure_location,
-                                    DbTrip.destination_location == destination_location,
+    trips=  db.query(DbTrip).filter(DbTrip.departure_location == departure_location.lower(),
+                                    DbTrip.destination_location == destination_location.lower(),
                                     DbTrip.departure_time >= departure_time,
                                     DbTrip.available_adult_seats >= available_adult_seats,
                                     DbTrip.available_children_seats >= available_children_seats).all()

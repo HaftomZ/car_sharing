@@ -13,6 +13,7 @@ class DbTrip(Base):
     destination_location= Column(String)
     departure_time = Column(DateTime) 
     arrival_time = Column(DateTime, nullable=True)
+    duration = Column(Float)
     available_adult_seats = Column(Integer)
     available_children_seats = Column(Integer)
     cost = Column(Float)
