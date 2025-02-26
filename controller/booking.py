@@ -4,8 +4,8 @@ from sqlalchemy.orm.session import Session
 from schemas.bookingSchema import *
 from models.Trips import DbTrip
 from fastapi import HTTPException, status
-def create_booking(db: Session, trip_id: int,booker_id:int,request: BookingBase):
-    booking = DbBooking(
+def create_booking(db: Session,booker_id:int, trip_id: int,request: BookingBase):
+    booking_tobe_created = DbBooking(
         trip_id=trip_id,
         booker_id=booker_id,
         pickup_location=request.pickup_location,
@@ -22,17 +22,16 @@ def create_booking(db: Session, trip_id: int,booker_id:int,request: BookingBase)
     #todo: check for available seats first and then add the booking.
     # and update the available seats in the trip table
     # after the available seats are all booked, the car status should be updated to not available
-    db.add(booking)
+    db.add(booking_tobe_created)
     db.commit()
-    db.refresh(booking)
+    db.refresh(booking_tobe_created)
     
-    return booking
-def cancel_booking(db: Session, booking_id: int):
-        booking = db.query(DbBooking).filter(DbBooking.booking_id == booking_id).first()
-        if not booking:
+    return booking_tobe_created
+def cancel_booking(db: Session, booker_id: int,booking_id:int):
+        booking_tobe_cancelled = db.query(DbBooking).filter(DbBooking.booker_id == booker_id,DbBooking.booking_id == booking_id).first()
+        if not booking_tobe_cancelled:
              raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'Booking not found!')
-        booking.status = 'cancelled'
-        db.delete(booking)
+        db.delete(booking_tobe_cancelled )
         db.commit()
         return "Booking cancelled successfully"
 # Booking status should be updated by driver only
@@ -51,11 +50,12 @@ def update_booking_status(db: Session, user_id: int, trip_id:int, booking_id: in
     db.commit()
     return f"status of booking id {booking_id} is updated successfully to {booking_status}"
 def update_my_bookings(db: Session, booker_id: int,booking_id: int, request: BookingBase):
-    booking_to_update = db.query(DbBooking).filter(DbBooking.booking_id == booking_id,DbBooking.booker_id==booker_id)
-    if not booking_to_update.first():
+    booking_tobe_update = db.query(DbBooking).filter(DbBooking.booking_id == booking_id,DbBooking.booker_id==booker_id)
+    if not booking_tobe_update.first():
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'Booking not found!')
-    booking_to_update.update({
+    booking_tobe_update.update({
         DbBooking.pickup_location : request.pickup_location,
+        DbBooking.end_location:request.end_location,
         DbBooking.adult_seats : request.adult_seats,
         DbBooking.children_seats :request.children_seats
     })

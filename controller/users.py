@@ -56,6 +56,11 @@ def login_user(db: Session, email: str, password: str):
 
 
 def update_user(db: Session, id:int, request: UserBase):
+    if len(request.about) >= 50:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="About section cannot be more than 50 characters!."
+        )
     user = db.query(DbUser).filter(DbUser.id == id)
     if not user.first():
          raise HTTPException(status_code= status.HTTP_404_NOT_FOUND,
