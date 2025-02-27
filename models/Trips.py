@@ -20,8 +20,6 @@ class DbTrip(Base):
     cost = Column(Float)
     passengers_count = Column(Integer, nullable=True)
     status = Column(String, default="Scheduled", nullable=True) # scheduled, ongoing, completed, or cancelled
-
-
     created_at = Column(String, default=func.now()) 
     updated_at = Column(String, nullable=True)
 
