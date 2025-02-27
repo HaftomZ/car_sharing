@@ -38,4 +38,4 @@ def delete_user_car(user_id: int, car_id: int, db: Session=Depends(get_db)):
 #update car availability status
 @router.put('/update_availability/{user_id}/{car_id}')
 def update_car_availability_status(user_id: int, car_id: int, status: car_availability,db: Session=Depends(get_db)):
-    return cars.update_car_availability_status(db, user_id, car_id, status)
+    return cars.update_car_availability_status(db, user_id, car_id, status.value)

@@ -14,13 +14,12 @@ class DbTrip(Base):
     destination_location= Column(String)
     departure_time = Column(DateTime) 
     arrival_time = Column(DateTime, nullable=True)
+    duration = Column(Float)
     available_adult_seats = Column(Integer)
     available_children_seats = Column(Integer)
     cost = Column(Float)
     passengers_count = Column(Integer, nullable=True)
     status = Column(String, default="Scheduled", nullable=True) # scheduled, ongoing, completed, or cancelled
-
-
     created_at = Column(String, default=func.now()) 
     updated_at = Column(String, nullable=True)
 
