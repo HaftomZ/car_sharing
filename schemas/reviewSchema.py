@@ -10,9 +10,9 @@ class User(BaseModel):
 
 
 class ReviewBase(BaseModel):
-    rating: int
+    #rating: int
     text_description: str | None = None
-    creator_id: int
+    #creator_id: int
     receiver_id: int
 
 
