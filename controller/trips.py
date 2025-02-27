@@ -1,4 +1,5 @@
 from models.Trips import DbTrip
+from models.Cars import DbCar
 from sqlalchemy.orm.session import Session
 from schemas.tripSchema import TripBase
 from fastapi import HTTPException , status
@@ -8,13 +9,32 @@ from controller import cars
 
 def trip_duration(departure_time: datetime, arrival_time: datetime):
     duration = arrival_time - departure_time
-    return duration.total_seconds() / 3600
+    duration_per_hours = duration.total_seconds() / 3600
+    return round(duration_per_hours,2)
 
-def create_trip(db: Session, request: TripBase, creator_id: int, car_id: int):
-    
+def trip_vaildation(db: Session, request: TripBase, car_id: int):
+    #check the departure and arrival time
     if request.departure_time >= request.arrival_time:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The arrival time should be after the departure time')
     
+    #check the available seats if positive
+    if request.available_adult_seats < 0 or request.available_children_seats < 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The number of the available seats should be a positive number')
+    
+    #check if the sum of adult seats and childeren seats is more than the car total seats
+    car = db.query(DbCar).filter(DbCar.id == car_id).first()
+    if (request.available_adult_seats + request.available_children_seats > car.total_seats):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The number of adults seats and children seats should not be more the the total seats in your car')
+
+    #check if the cost is positive
+    if request.cost < 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The should should be a positive number')
+    
+
+def create_trip(db: Session, request: TripBase, creator_id: int, car_id: int):
+    
+    trip_vaildation(db, request, car_id)
+
     trip = DbTrip(
         creator_id = creator_id,
         car_id = car_id,
@@ -38,8 +58,7 @@ def update_trip(db: Session,request: TripBase, creator_id: int , trip_id: int):
     if not trip.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'There is no trip with id {trip_id}')
     
-    if request.departure_time >= request.arrival_time:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The arrival time should be after the departure time')
+    trip_vaildation(db, request, trip.first().car_id)
 
     trip.update({ 
         DbTrip.departure_location : request.departure_location.lower(),
