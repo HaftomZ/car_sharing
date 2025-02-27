@@ -155,8 +155,8 @@ for row in rows:
 
 # SQL query to insert data
 insert_query_reviews_4 = '''
-INSERT INTO cars (owner_id, id, model, year, adult_seats, children_seats, smoking_allowed, wifi_available, air_conditioning, pet_friendly, car_status, car_availability_status)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO cars (owner_id, id, model, year, total_seats, smoking_allowed, wifi_available, air_conditioning, pet_friendly, car_status, car_availability_status)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
 '''
 
 
@@ -169,8 +169,8 @@ def generate_cars():
         owner_id = (i % 5) + 1
         year = 2010+i
         model = f'BMW {i}'
-        adult_seats = ((i + 1) % 3) + 1
-        children_seats = ((i + 1) % 3) + 1
+        total_seats = ((i + 1) % 3) + 1
+
         smoking_allowed = True
         wifi_available = True
         air_conditioning = True
@@ -178,7 +178,7 @@ def generate_cars():
         car_status = "approved"
         car_availability_status = "available"
 
-        cars.append((owner_id, id, model, year, adult_seats, children_seats, smoking_allowed, wifi_available, air_conditioning, pet_friendly, car_status, car_availability_status))
+        cars.append((owner_id, id, model, year,total_seats, smoking_allowed, wifi_available, air_conditioning, pet_friendly, car_status, car_availability_status))
     return cars
 
 
