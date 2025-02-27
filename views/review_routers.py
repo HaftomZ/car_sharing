@@ -1,3 +1,4 @@
+from enum import Enum
 from schemas.reviewSchema import ReviewBase
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -13,10 +14,17 @@ router = APIRouter(
 )
 
 
+class UserRating(int, Enum):
+    one = 1
+    two = 2
+    three = 3
+    four = 4
+    five = 5
+
 # Create review
 @router.post("/", response_model=ReviewDisplay)
-def create_review(request: ReviewBase, db: Session = Depends(get_db)):
-    return db_review.create_review(db, request)
+def create_review(request: ReviewBase, user_rating: UserRating, receiver_id: int, creator_id: int, db: Session = Depends(get_db)):
+    return db_review.create_review(db, request, user_rating, receiver_id, creator_id)
 
 
 # Read specific review
@@ -39,11 +47,11 @@ def get_review(creator_id: int, db: Session = Depends(get_db)):
 
 # Update review
 @router.put('/{id}/update')
-def update_review(id: int, request: ReviewBase, db: Session = Depends(get_db)):
-    return db_review.update_review(db, id, request)
+def update_review(id: int, request: ReviewBase, user_rating: UserRating, creator_id: int, db: Session = Depends(get_db)):
+    return db_review.update_review(db, id, request, user_rating, creator_id)
 
 
 # Delete review
 @router.delete('/delete/{id}')
-def delete_review(id: int, db: Session = Depends(get_db)):
-    return db_review.delete_review(db, id)
+def delete_review(id: int, creator_id: int, db: Session = Depends(get_db)):
+    return db_review.delete_review(db, id, creator_id)

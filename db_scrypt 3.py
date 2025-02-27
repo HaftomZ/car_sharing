@@ -170,7 +170,7 @@ def generate_cars():
         year = 2010+i
         model = f'BMW {i}'
         total_seats = ((i + 1) % 3) + 1
-        
+
         smoking_allowed = True
         wifi_available = True
         air_conditioning = True
