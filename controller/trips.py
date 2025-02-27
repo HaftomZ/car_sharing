@@ -115,7 +115,7 @@ def get_all_user_trips(db: Session, user_id: int):
 #search for trip
 def search_trip(db: Session, departure_location: str, destination_location: str,
                 departure_time: datetime, available_adult_seats: int, available_children_seats: int):
-    trips=  db.query(DbTrip).filter(DbTrip.departure_location == departure_location.lower(),
+    trips=  db.query(DbTrip).filter(DbTrip.departure_location== departure_location.lower(),
                                     DbTrip.destination_location == destination_location.lower(),
                                     DbTrip.departure_time >= departure_time,
                                     DbTrip.available_adult_seats >= available_adult_seats,
@@ -125,24 +125,24 @@ def search_trip(db: Session, departure_location: str, destination_location: str,
     return trips
 
 #update trip status
-def update_trip_status(db: Session, user_id: int , trip_id: int, status: str):
+def update_trip_status(db: Session, user_id: int , trip_id: int, trip_status: str):
     trip = db.query(DbTrip).filter(DbTrip.id == trip_id, DbTrip.creator_id == user_id)
     if not trip.first():
        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'There is no trip with id {trip_id}')
     
     trip.update({ 
-       DbTrip.status : status.lower()
+       DbTrip.status : trip_status.lower()
        })
     car_id = trip.first().car_id
 
     car_status = ""
-    if status == "ongoing":
+    if trip_status == "Ongoing":
         car_status = "in use"
         cars.update_car_availability_status(db, user_id, car_id , car_status)
 
-    elif status == "cancelled" or status == "scheduled" or status == "completed":
+    elif trip_status == "Cancelled" or trip_status == "Scheduled" or trip_status == "Completed":
         car_status = "available"
         cars.update_car_availability_status(db, user_id, car_id , car_status)
     db.commit()
-    return f'Your trip status has been updated to {status} and your car availability status has been updated to {car_status}'
+    return f'Your trip status has been updated to {trip_status} and your car availability status has been updated to {car_status}'
     
