@@ -4,6 +4,8 @@ from models import Users , Cars
 from views import user_routers , car_routers, review_routers, booking_routers, trip_routers
 
 
+
+
 app = FastAPI()
 app.include_router(user_routers.router)
 app.include_router(booking_routers.router)
