@@ -2,8 +2,8 @@ from models.Booking import DbBooking
 from models.Trips import DbTrip
 from sqlalchemy.orm.session import Session
 from schemas.bookingSchema import *
-from models.Trips import DbTrip
 from fastapi import HTTPException, status
+from controller import cars
 
 def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBase):
     booking_tobe_created = DbBooking(
@@ -42,12 +42,15 @@ def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBas
              
          })
            
-    elif check_available_seats.first().available_adult_seats==0 and\
-         check_available_seats.first().available_children_seats!=0:
-        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, 
-                            detail= f'Sorry the available seats are only {check_available_seats.first().available_children_seats} for children, it is all booked!')
+    # elif check_available_seats.first().available_adult_seats==0 and\
+    #      check_available_seats.first().available_children_seats!=0:
+    #     raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, 
+    #                         detail= f'Sorry the available seats are only {check_available_seats.first().available_children_seats} for children, it is all booked!')
     else:
-
+        update_car = cars.update_car_availability_status(
+                                            db,check_available_seats.first().creator_id,
+                                            check_available_seats.first().car_id, car_status="Unavailable"
+                                            )
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= 'Sorry the trip is fully boooked!')
     
 
@@ -62,7 +65,7 @@ def cancel_booking(db: Session, booker_id: int,booking_id:int):
         booking_tobe_cancelled = db.query(DbBooking).filter(DbBooking.booker_id == booker_id,DbBooking.booking_id == booking_id).first()
         if not booking_tobe_cancelled:
              raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'Booking not found!')
-        trip=db.query(DbTrip).filter(DbTrip.id==booking_tobe_cancelled.trip_id)
+        trip=db.query(DbTrip).filter(DbTrip.id == booking_tobe_cancelled.trip_id)
         trip.first().available_adult_seats+=DbBooking.adult_seats
         trip.first().available_children_seats+=DbBooking.children_seats
         trip.first().passengers_count -= (DbBooking.adult_seats + DbBooking.children_seats)
@@ -71,6 +74,10 @@ def cancel_booking(db: Session, booker_id: int,booking_id:int):
                DbTrip.available_children_seats: trip.first().available_children_seats,
                DbTrip.passengers_count : trip.first().passengers_count
            })
+        update_car = cars.update_car_availability_status(
+                                            db,trip.first().creator_id,
+                                            trip.first().car_id, car_status ="available"
+                                            )
         db.delete(booking_tobe_cancelled )
         db.commit()
         return "Booking cancelled successfully"
