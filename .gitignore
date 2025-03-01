@@ -8,3 +8,4 @@ hrin.db
 
 __pycache__/
 *.pyc
+db_scrypt.py
