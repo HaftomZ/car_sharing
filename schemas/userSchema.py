@@ -31,8 +31,7 @@ class Trip(BaseModel):
 class Car(BaseModel):
     model : str
     year : int
-    adult_seats : int
-    children_seats : int
+    total_seats : int
     smoking_allowed : bool
     wifi_available : bool
     air_conditioning : bool
