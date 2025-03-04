@@ -13,7 +13,7 @@ class ReviewBase(BaseModel):
     #rating: int
     text_description: str | None = None
     #creator_id: int
-    receiver_id: int
+    #receiver_id: int
 
 
 class ReviewDisplay(BaseModel):

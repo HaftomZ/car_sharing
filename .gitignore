@@ -8,3 +8,5 @@ hrin.db
 
 __pycache__/
 *.pyc
+avatar.py
+images.py

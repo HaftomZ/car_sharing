@@ -12,7 +12,8 @@ router = APIRouter(
     tags=['trips']
 )
 
-class trip_status(str, Enum):
+
+class TripStatus(str, Enum):
     scheduled = "Scheduled"
     ongoing = "Ongoing"
     completed = "Completed"
@@ -46,5 +47,5 @@ def searsh_trip(departure_location: str, destination_location: str, departure_ti
 
 #update_trip_status
 @router.put('/update_status/{user_id}/{trip_id}')
-def update_trip_status(user_id: int, trip_id: int, status: trip_status, db: Session=Depends(get_db)):
+def update_trip_status(user_id: int, trip_id: int, status: TripStatus, db: Session=Depends(get_db)):
     return trips.update_trip_status(db, user_id, trip_id, status.value)

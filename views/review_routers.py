@@ -47,8 +47,8 @@ def get_review(creator_id: int, db: Session = Depends(get_db)):
 
 # Update review
 @router.put('/{id}/update')
-def update_review(id: int, request: ReviewBase, user_rating: UserRating, creator_id: int, db: Session = Depends(get_db)):
-    return db_review.update_review(db, id, request, user_rating, creator_id)
+def update_review(id: int, request: ReviewBase, receiver_id: int, user_rating: UserRating, creator_id: int, db: Session = Depends(get_db)):
+    return db_review.update_review(db, id, request, user_rating, creator_id, receiver_id)
 
 
 # Delete review

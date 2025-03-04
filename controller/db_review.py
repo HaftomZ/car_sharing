@@ -58,13 +58,13 @@ def get_all_reviews_left(db: Session, creator_id: int):
     return review
 
 
-def update_review(db: Session, id: int, request: ReviewBase, user_rating: int, creator_id: int):
+def update_review(db: Session, id: int, request: ReviewBase, user_rating: int, creator_id: int, receiver_id: int):
     review = db.query(DbReview).filter(DbReview.id == id)
-    creator = db.query(DbReview).filter(DbReview.creator_id == creator_id).first()
+    creator = db.query(DbReview).filter(DbReview.creator_id == creator_id)
     if not review.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                              detail=f'Review with id {id} does not exist.')
-    if not creator:
+    if not creator.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                              detail=f'You do not have rights to update this review')
     if len(request.text_description) >= 300:
@@ -74,7 +74,8 @@ def update_review(db: Session, id: int, request: ReviewBase, user_rating: int, c
     review.update({
         DbReview.rating: user_rating,
         DbReview.text_description: request.text_description,
-        DbReview.created_at: func.now()
+        DbReview.created_at: func.now(),
+        DbReview.receiver_id: receiver_id
     })
     db.commit()
     return f"Review with id {id} was successfully updated."

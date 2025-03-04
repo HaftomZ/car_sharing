@@ -47,9 +47,9 @@ def update_trip(db: Session,request: TripBase, creator_id: int , trip_id: int):
         DbTrip.departure_time : request.departure_time,
         DbTrip.arrival_time : request.arrival_time,
         DbTrip.available_adult_seats : request.available_adult_seats,
-        DbTrip.available_children_seats : request.available_children_seats,
+        DbTrip.available_children_seats: request.available_children_seats,
         DbTrip.cost: request.cost,
-        DbTrip.updated_at : func.now(),
+        DbTrip.updated_at: func.now(),
         DbTrip.duration: trip_duration(request.departure_time, request.arrival_time)
         })
     db.commit()
@@ -65,17 +65,19 @@ def delete_trip(db: Session, user_id: int, trip_id: int):
     db.commit()
     return 'Your trip has been removed successfully!'
 
+
 #get all trips that are related to a user
 def get_all_user_trips(db: Session, user_id: int):
-   trips=  db.query(DbTrip).filter(DbTrip.creator_id == user_id).all()
+   trips = db.query(DbTrip).filter(DbTrip.creator_id == user_id).all()
    if not trips:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='There are no trips found!')
    return trips
 
-#search for trip
+
+# search for trip
 def search_trip(db: Session, departure_location: str, destination_location: str,
                 departure_time: datetime, available_adult_seats: int, available_children_seats: int):
-    trips=  db.query(DbTrip).filter(DbTrip.departure_location == departure_location.lower(),
+    trips = db.query(DbTrip).filter(DbTrip.departure_location == departure_location.lower(),
                                     DbTrip.destination_location == destination_location.lower(),
                                     DbTrip.departure_time >= departure_time,
                                     DbTrip.available_adult_seats >= available_adult_seats,
@@ -102,7 +104,7 @@ def update_trip_status(db: Session, user_id: int , trip_id: int, status: str):
 
     elif status == "Cancelled" or status == "Scheduled" or status == "Completed":
         car_status = "Available"
-        cars.update_car_availability_status(db, user_id, car_id , "Available")
+        cars.update_car_availability_status(db, user_id, car_id, "Available")
     db.commit()
     return f'Your trip status has been updated to {status} and your car availability status has been updated to {car_status}'
     
