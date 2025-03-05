@@ -16,7 +16,7 @@ def create_token(request: OAuth2PasswordRequestForm, db: Session):
     if not Hash.Hash.verify(user.password, request.password):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= 'invalid password')
     
-    access_token = oauth2.create_access_token(data={'sub': user.user_name})
+    access_token = oauth2.create_access_token(data={'sub': str(user.id)})
     return {
         'access_token': access_token
     }
@@ -28,13 +28,13 @@ def get_current_user(token: str = Depends(oauth2.oauth2_scheme), db: Session = D
                                         headers={"WWW-Authenticate":"Bearer"})
     try:
         payload= jwt.decode(token, oauth2.SECRET_KEY,algorithms=[oauth2.ALGORITHM])
-        username= payload.get("sub")
-        if username is None:
+        user_id = payload.get("sub")
+        if user_id is None:
             raise credentials_exception
     except JWEError:
        raise credentials_exception
     
-    user = db.query(DbUser).filter(DbUser.user_name == username).first()
+    user = db.query(DbUser).filter(DbUser.id == int(user_id)).first()
 
     if user is None:
        raise credentials_exception
