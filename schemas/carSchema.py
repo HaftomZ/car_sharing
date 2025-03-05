@@ -2,13 +2,15 @@ from pydantic import BaseModel
 
 class CarBase(BaseModel): 
     model : str
+    license_plate : str
     year : int
     total_seats : int
     smoking_allowed : bool
     wifi_available : bool
     air_conditioning : bool
     pet_friendly : bool
-    #owner_id : int
+    car_availability_status: str
+    owner_id : int
 
 #User inside CarDispaly
 class User(BaseModel):
@@ -23,6 +25,7 @@ class User(BaseModel):
 class CarDisplay(BaseModel): 
     id:int
     model : str
+    license_plate : str
     year : int
     total_seats : int
     smoking_allowed : bool
