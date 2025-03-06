@@ -20,7 +20,7 @@ def trip_vaildation(db: Session, request: TripBase, car_id: int):
     #check the available seats if positive
     if request.available_adult_seats < 0 or request.available_children_seats < 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The number of the available seats should be a positive number')
-    
+
     #check if the sum of adult seats and children seats is more than the car total seats
     car = db.query(DbCar).filter(DbCar.id == car_id).first()
     if (request.available_adult_seats + request.available_children_seats > car.total_seats):
@@ -29,10 +29,10 @@ def trip_vaildation(db: Session, request: TripBase, car_id: int):
     #check if the cost is positive
     if request.cost < 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The cost should be a positive number')
-    
+
 
 def create_trip(db: Session, request: TripBase, creator_id: int, car_id: int):
-    
+
     #check if the user have the car that he wants to create a trip using it
     car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == creator_id).first()
     if not car:
@@ -41,7 +41,7 @@ def create_trip(db: Session, request: TripBase, creator_id: int, car_id: int):
     #check the availability of the car
     if car.car_availability_status != "available":
        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail= f'You can not add a trip with car id {car_id}, because the status of this car is not available. Turn it to available then try again.')
-    
+
     trip_vaildation(db, request, car_id)
 
     #check if the user have a trip before with the same car and during the same time
