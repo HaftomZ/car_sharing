@@ -17,9 +17,11 @@ class ReviewBase(BaseModel):
 
 
 class ReviewDisplay(BaseModel):
+    id: int
     rating: int
     text_description: str
     creator_id: int
     receiver_id: int
+    photos: str
     class Config():
         orm_mode = True

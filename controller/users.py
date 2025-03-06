@@ -2,7 +2,9 @@ from config.Hash import Hash
 from sqlalchemy.orm.session import Session
 from schemas.userSchema import UserBase
 from models.Users import DbUser
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, File, UploadFile
+from pathlib import Path
+from config.pictures_handler import upload_picture
 
 def create_user(db: Session, request: UserBase):
     if len(request.about) >= 50:
@@ -30,6 +32,25 @@ def create_user(db: Session, request: UserBase):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+UPLOAD_DIR = Path("avatars")
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+
+def upload_avatar(db: Session, id: int, file: UploadFile = File(...)):
+    user = db.query(DbUser).filter(DbUser.id == id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    old_avatar_path = Path(user.avatar)
+    if old_avatar_path.exists():
+        old_avatar_path.unlink()
+    final_path = upload_picture(UPLOAD_DIR, file)
+    user.avatar = str(final_path)
+    db.commit()
+    db.refresh(user)
+    return user
+
 
 def get_all_users(db:Session):
     all_users = db.query(DbUser).all()
