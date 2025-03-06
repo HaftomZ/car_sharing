@@ -6,3 +6,5 @@ bcrypt
 pydantic[email]
 requests
 python-jose
+pillow
+python-multipart
