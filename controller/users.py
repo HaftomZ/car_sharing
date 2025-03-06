@@ -3,8 +3,18 @@ from sqlalchemy.orm.session import Session
 from schemas.userSchema import UserBase
 from models.Users import DbUser
 from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
+import re
 
 def create_user(db: Session, request: UserBase):
+    email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    
+    if not re.match(email_regex, request.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Use a valid email type, example ***@gmail.com"
+        )
+    
     if len(request.about) >= 50:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -29,7 +39,10 @@ def create_user(db: Session, request: UserBase):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user
+    return JSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        content={"message": "Account has been created!, Please Log in!"}
+    )
 
 def get_all_users(db:Session):
     all_users = db.query(DbUser).all()
@@ -43,7 +56,7 @@ def login_user(db: Session, email: str, password: str):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Invalid Email! Create an account first!."
+            detail="Email is already exist! Create an account first!."
         )
 
     if not Hash.verify(user.password, password):  
