@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import List
 from datetime import datetime
+from fastapi import File, UploadFile
 
 class Booking(BaseModel):
     booking_id: int

@@ -17,8 +17,8 @@ class DbBooking(Base):
     trip_id = Column(Integer, ForeignKey('trips.id', ondelete="CASCADE"))
     status = Column(String, default="pending")  # e.g., pending, confirmed, canceled    
     adult_seats = Column(Integer,  nullable=True)  
-    children_seats = Column(Integer, default= 0, nullable=True)  
-    created_at =Column(String, default=func.now())  
+    children_seats = Column(Integer, default=0, nullable=True)
+    created_at = Column(String, default=func.now())
     updated_at = Column(String, default=func.now(), onupdate=func.now())  #  auto-updated?
     pickup_location = Column(String, nullable=True)
     end_location = Column(String, nullable=True)
