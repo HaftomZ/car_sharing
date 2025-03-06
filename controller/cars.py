@@ -19,10 +19,22 @@ def car_validation(request: CarBase):
     if request.model.upper() not in valid_cars:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f'Model car {request.model} is not a valid model')
 
-    #check license plate
-    pattern = r"^[A-Z]{2,3}-?\d{2,4}$"
+    #check license plate according to Dutch patterns
+    # XX-99-99
+    # 99-99-XX
+    # 99-XX-99
+    # XX-99-XX
+    # XX-XX-99
+    # 99-XX-XX
+    # 99-XXX-9
+    # 9-XXX-99
+    # XX-999-X
+    # X-999-XX
+    # XXX-99-X
+    # 9-XX-999
+    pattern = r"(\w{2}-\d{2}-\d{2})|(\d{2}-\d{2}-\w{2})|(\d{2}-\w{2}-\d{2})|(\w{2}-\d{2}-\w{2})|(\w{2}-\w{2}-\d{2})|(\d{2}-\w{2}-\w{2})|(\d{2}-\w{3}-\d{1})|(\d{1}-\w{3}-\d{2})|(\w{2}-\d{3}-\w{1})|(\w{1}-\d{3}-\w{2})|(\w{3}-\d{2}-\w{1})|(\d{1}-\w{2}-\d{3})"
     if not re.match(pattern, request.license_plate):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid license plate. It should contains 2 to 3 uppercase letters and 2 to 4 digits")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid license plate {request.license_plate}")
     
 
     # Check if the year is a 4 digit number within a valid range
