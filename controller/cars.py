@@ -89,7 +89,7 @@ def get_all_user_cars(db: Session, user_id: int):
 def update_user_car(db: Session , car_id: int, request: CarBase):
     car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == request.owner_id)
     if not car.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You does not have a car with id {car_id}')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You do not have a car with id {car_id}')
     
     car_validation(request)
 

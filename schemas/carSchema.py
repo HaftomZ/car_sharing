@@ -24,6 +24,7 @@ class User(BaseModel):
 
 class CarDisplay(BaseModel): 
     id:int
+    owner_id: int #this is instead of returning user object
     model : str
     license_plate : str
     year : int

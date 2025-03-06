@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel , Field
 from datetime import datetime
 from typing import Optional
 from typing import List
@@ -10,7 +10,11 @@ class TripBase(BaseModel):
     arrival_time: datetime
     available_adult_seats: int
     available_children_seats: int
+    status: str #= Field(..., description ="scheduled, ongoing, completed, or cancelled")
     cost: float
+    creator_id: int
+    car_id : int
+
 
 class Booking(BaseModel):
     booker_id: int 
@@ -23,11 +27,10 @@ class Booking(BaseModel):
 
 class TripDisplay(BaseModel): 
     id: int 
-    car_id: int
     departure_location: str
     destination_location: str
     departure_time: datetime
-    arrival_time: datetime | None = None
+    arrival_time: datetime
     duration: float
     available_adult_seats: int
     available_children_seats: int
@@ -36,6 +39,8 @@ class TripDisplay(BaseModel):
     status: str | None = None
     created_at: str
     updated_at: str | None = None
+    car_id: int
+    creator_id: int
     trip_booked: List[Booking] = []
    # trip_booked  : Booking
     class Config:
