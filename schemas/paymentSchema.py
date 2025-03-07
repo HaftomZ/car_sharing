@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-class PaymentRequest(BaseModel):
+class Paymentbase(BaseModel):
     booking_id: int
     user_id: int
     amount: float
