@@ -6,6 +6,7 @@ import requests
 import datetime
 import re
 from sqlalchemy.exc import IntegrityError
+from schemas.carSchema import CarAvailability
 
 def car_validation(request: CarBase):
 
@@ -47,7 +48,7 @@ def car_validation(request: CarBase):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid total seats {request.total_seats}. Must be between 1 and 7")
     
     #check the availability status
-    if request.car_availability_status.lower() not in ["available" , "unavailable"]:
+    if request.car_availability_status.lower() not in [CarAvailability.available , CarAvailability.unavailable]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid availability {request.car_availability_status}, it should be available or unavailable")
 
     

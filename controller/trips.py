@@ -1,11 +1,13 @@
 from models.Trips import DbTrip
 from models.Cars import DbCar
 from sqlalchemy.orm.session import Session
-from schemas.tripSchema import TripBase
+from schemas.tripSchema import TripBase , TripStatus
+from schemas.carSchema import CarAvailability
 from fastapi import HTTPException , status
 import datetime
 from sqlalchemy import  func 
 from controller import cars
+import requests
 
 def trip_duration(departure_time: datetime, arrival_time: datetime):
     duration = arrival_time - departure_time
@@ -13,7 +15,39 @@ def trip_duration(departure_time: datetime, arrival_time: datetime):
     return round(duration_per_hours,2)
 
 
+def city_name_validation(city_name: str):
+    # api_url = 'https://api.api-ninjas.com/v1/city?name={}'.format(city_name)
+    # response = requests.get(api_url, headers={'X-Api-Key': 'u6HXeCfNAwAIbH6BXUXdCg==ntvSIQMalRYRVEgb'})
+
+    # if response.status_code == requests.codes.ok:
+    #     if not response.json():
+    #         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f'Invalid city {city_name}')
+    #     if (response.json()[0]['name'].lower() != city_name.lower()):
+    #         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f'Invalid city {city_name}')
+    # else:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'something went wrong')
+    if city_name.lower() == "string":  
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f'Invalid city {city_name}')
+    
+    api_url = f"https://nominatim.openstreetmap.org/search?q={city_name}&format=json"
+    headers = {
+        "User-Agent": "car_sharing/1.0 (roula.arab95@gmail.com)" 
+    }
+    response = requests.get(api_url, headers=headers)
+
+    if response.status_code == 200:
+        if not response.json(): #response.json()[0]['display_name']
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f'Invalid city {city_name}')
+    else:
+       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'something went wrong')
+
+
 def trip_vaildation(db: Session, request: TripBase):
+
+    #check departure and destination location
+    city_name_validation(request.departure_location)
+    city_name_validation(request.destination_location)
+
     #check the departure and arrival time
     if request.departure_time >= request.arrival_time:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'The arrival time should be after the departure time')
@@ -40,13 +74,13 @@ def create_trip(db: Session, request: TripBase):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You do not have a car with car id {request.car_id}')
 
     #check the availability of the car
-    if car.car_availability_status != "available":
+    if car.car_availability_status != CarAvailability.available:
        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail= f'You can not add a trip with car id {request.car_id}, because the status of this car is not available. Turn it to available then try again.')
 
     trip_vaildation(db, request)
 
     #check the status 
-    if request.status.lower() != "scheduled":
+    if request.status.lower() != TripStatus.scheduled:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid status {request.status}, it should be only scheduled")
 
     #check if the user have a trip before with the same car and during the same time
@@ -89,7 +123,7 @@ def update_trip(db: Session,request: TripBase, trip_id: int):
     trip_vaildation(db, request)
 
     #check the status 
-    if request.status.lower() not in ["scheduled", "ongoing", "completed", "cancelled"]:
+    if request.status.lower() not in [TripStatus.scheduled, TripStatus.ongoing, TripStatus.completed, TripStatus.cancelled]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid status {request.status}, it should be scheduled, ongoing, completed, or cancelled")
 
     #check if the user have a trip before with the same car and during the same time
@@ -113,12 +147,12 @@ def update_trip(db: Session,request: TripBase, trip_id: int):
         })
     
     car_status = ""
-    if request.status.lower() == "ongoing":
-        car_status = "in use"
+    if request.status.lower() == TripStatus.ongoing:
+        car_status = CarAvailability.in_use
         cars.update_car_availability_status(db, request.creator_id, request.car_id , car_status)
 
-    elif request.status.lower() in ["cancelled" , "scheduled" , "completed"]:
-        car_status = "available"
+    elif request.status.lower() in [TripStatus.cancelled , TripStatus.scheduled , TripStatus.completed]:
+        car_status = CarAvailability.available
         cars.update_car_availability_status(db, request.creator_id, request.car_id , car_status)
     
     db.commit()
