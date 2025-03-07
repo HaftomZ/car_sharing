@@ -80,13 +80,7 @@ def update_review(db: Session, id: int, request: ReviewBase, user_rating: int, c
     review.rating = user_rating
     review.text_description = request.text_description
     review.created_at = func.now()
-    review.receiver_id = receiver_id
-    review.update({
-        DbReview.rating: user_rating,
-        DbReview.text_description: request.text_description,
-        DbReview.created_at: func.now(),
-        DbReview.receiver_id: receiver_id
-    })
+    review.receiver_id = receiver_id   
     db.commit()
     db.refresh(review)
     return review
