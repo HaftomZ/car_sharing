@@ -24,8 +24,7 @@ def create_user(db: Session, request: UserBase):
         email = request.email,
         password = Hash.bcrypt(request.password),
         about = request.about,
-        phone_number = request.phone_number,
-        avatar = request.avatar       
+        phone_number = request.phone_number
     )
 
     db.add(new_user)
@@ -91,7 +90,6 @@ def update_user(db: Session, id:int, request: UserBase):
         DbUser.email: request.email,
         DbUser.password: Hash.bcrypt(request.password),
         DbUser.about: request.about,
-        DbUser.avatar: request.avatar,
         DbUser.phone_number: request.phone_number,
     })
     db.commit()
