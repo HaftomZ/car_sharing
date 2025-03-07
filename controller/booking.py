@@ -1,18 +1,26 @@
 from models.Booking import DbBooking
 from models.Trips import DbTrip
+from models.Payment import DbPayment
 from sqlalchemy.orm.session import Session
 from schemas.bookingSchema import *
 from fastapi import HTTPException, status
 from controller import cars
+from threading import Timer
+from datetime import datetime,timezone
 
 def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBase):
+   
     booking_tobe_created = DbBooking(
         trip_id = trip_id,
         booker_id = booker_id,
         pickup_location = request.pickup_location,
         end_location = request.end_location,
         adult_seats = request.adult_seats,
-        children_seats = request.children_seats
+        children_seats = request.children_seats,
+        created_at= datetime.now(timezone.utc),
+        updated_at = datetime.now(timezone.utc)
+        
+
         )
     trip = db.query(DbBooking).filter(DbBooking.trip_id == trip_id, DbBooking.booker_id == booker_id).first()
     if trip:
@@ -25,6 +33,8 @@ def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBas
     # and update the available seats in the trip table here
 
     check_available_seats = db.query(DbTrip).filter(DbTrip.id==trip_id)
+    if  check_available_seats.first().status in ["completed", "cancelled"]:
+         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'The trip is closed or cancelled')
     if check_available_seats.first().available_adult_seats!=0:
      if (request.children_seats > check_available_seats.first().available_children_seats) or\
         (request.adult_seats > check_available_seats.first().available_adult_seats):
@@ -54,11 +64,33 @@ def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBas
                                             db,check_available_seats.first().creator_id,
                                             check_available_seats.first().car_id, car_status="Unavailable"
                                             )
+    
+    Timer(60, release_seat_if_payment_fails, args=[booker_id, trip_id, db]).start()
+    
     return booking_tobe_created
 
+def release_seat_if_payment_fails(booker_id : int, trip_id : int, db:Session):
+     
+    temp_booking = db.query(DbBooking).filter(DbBooking.booker_id == booker_id,DbBooking.trip_id == trip_id).with_for_update().first()
+    if temp_booking.status == "Pending":
+       trip=db.query(DbTrip).filter(DbTrip.id == temp_booking.trip_id)
+       trip.first().available_adult_seats += temp_booking.adult_seats
+       trip.first().available_children_seats += temp_booking.children_seats
+       trip.first().passengers_count -= (temp_booking.adult_seats + temp_booking.children_seats)
+       trip.update({
+               DbTrip.available_adult_seats : trip.first().available_adult_seats,
+               DbTrip.available_children_seats: trip.first().available_children_seats,
+               DbTrip.passengers_count : trip.first().passengers_count
+           })
+       update_car = cars.update_car_availability_status(
+                                            db,trip.first().creator_id,
+                                            trip.first().car_id, car_status ="available"
+                                            )
+       db.delete(temp_booking)  
+       db.commit()
 #After cancelling the booking, the seats that were booked must be released and car availablity must be updated.
-def cancel_booking(db: Session, booker_id: int,booking_id:int):
-        booking_tobe_cancelled = db.query(DbBooking).filter(DbBooking.booker_id == booker_id,DbBooking.booking_id == booking_id).first()
+def cancel_booking(db: Session, booking_id:int):
+        booking_tobe_cancelled = db.query(DbBooking).filter(DbBooking.booking_id == booking_id).first()
         if not booking_tobe_cancelled:
              raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'Booking not found!')
         trip=db.query(DbTrip).filter(DbTrip.id == booking_tobe_cancelled.trip_id)
@@ -74,44 +106,19 @@ def cancel_booking(db: Session, booker_id: int,booking_id:int):
                                             db,trip.first().creator_id,
                                             trip.first().car_id, car_status ="available"
                                             )
+        payment_refund = db.query(DbPayment).filter(DbPayment.booking_id == booking_id, DbPayment.user_id == booking_tobe_cancelled.booker_id).first()
+        if payment_refund:
+            payment_refund.refund_status = True
         db.delete(booking_tobe_cancelled )
         db.commit()
+       
         return "Booking cancelled successfully"
 
-#it has to update the trip available seats and the cars availability if the status is rejected.
-# Booking status should be updated by driver only
-def update_booking_status(db: Session, user_id: int, trip_id:int, booking_id: int,booking_status: str):
-    trip=db.query(DbTrip).filter(DbTrip.creator_id == user_id, DbTrip.id==trip_id)
-    if not trip.first():
-     raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'You are not the driver of this trip!')
-    passenger_booking_id = db.query(DbBooking).filter(DbBooking.booking_id == booking_id)
-    if not passenger_booking_id.first():
-        raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'There is no such booking!')
-    
-    passenger_booking_id.update({
-         DbBooking.status :booking_status
-        })
-    if booking_status == "rejected":
-      
-        trip.first().available_adult_seats+=passenger_booking_id.first().adult_seats
-        trip.first().available_children_seats+=passenger_booking_id.first().children_seats
-        trip.first().passengers_count -= (passenger_booking_id.first().adult_seats + passenger_booking_id.first().children_seats)
-        trip.update({
-               DbTrip.available_adult_seats : trip.first().available_adult_seats,
-               DbTrip.available_children_seats: trip.first().available_children_seats,
-               DbTrip.passengers_count : trip.first().passengers_count
-        }) 
-        update_car = cars.update_car_availability_status(
-                                            db,trip.first().creator_id,
-                                            trip.first().car_id, car_status ="available"
-                                            )
 
-    db.commit()
-    return f"status of booking id {booking_id} is updated successfully to {booking_status}"
 
 # Todo: After updating a booking, the available seats and car availabilty has to be updated.
-def update_my_bookings(db: Session, booker_id: int,booking_id: int, request: BookingBase):
-    booking_tobe_update = db.query(DbBooking).filter(DbBooking.booking_id == booking_id,DbBooking.booker_id==booker_id)
+def update_my_bookings(db: Session, booking_id: int, request: BookingBase):
+    booking_tobe_update = db.query(DbBooking).filter(DbBooking.booking_id == booking_id)
     if not booking_tobe_update.first():
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'Booking not found!')
     
@@ -155,7 +162,7 @@ def update_my_bookings(db: Session, booker_id: int,booking_id: int, request: Boo
                                             trip.first().car_id, car_status
                                             )
 
-    return f"Booking {booking_id} is updated successfully"
+    return booking_tobe_update.first()
    
 def list_my_bookings(db: Session, user_id: int):
     lists= db.query(DbBooking).filter(DbBooking.booker_id == user_id).all()
@@ -164,5 +171,9 @@ def list_my_bookings(db: Session, user_id: int):
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'You do not have any bookings!')
      
     return lists
+
+def list_all_booking(db: Session):
+     lists=db.query(DbBooking).all()
+     return lists
     
 
