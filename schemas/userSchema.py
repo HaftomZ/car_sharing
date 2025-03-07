@@ -62,7 +62,7 @@ class userDisplay(BaseModel):
     trip_booked: List[Booking] = []
 
     class Config():
-        orm_mode = True
+        from_attributes = True
 
     
 

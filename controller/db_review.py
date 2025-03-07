@@ -76,7 +76,7 @@ def update_review(db: Session, id: int, request: ReviewBase, user_rating: int, c
     if len(request.text_description) >= 300:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Text description  cannot be more than 300 characters.")
+            detail="Text description cannot be more than 300 characters.")
     review.update({
         DbReview.rating: user_rating,
         DbReview.text_description: request.text_description,
