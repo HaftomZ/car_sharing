@@ -26,3 +26,5 @@ class DbUser(Base):
     trip = relationship("DbTrip", back_populates="user", cascade="all, delete-orphan")
     payment = relationship("DbPayment", back_populates="user")
 
+
+

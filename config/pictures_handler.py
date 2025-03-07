@@ -18,7 +18,7 @@ def compress_image(input_path: Path, output_path: Path, quality: int = COMPRESSI
 def upload_picture(upload_dir: Path, file: UploadFile = File(...)):
     ext = file.filename.split(".")[-1].lower()
     if ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Wrong file type {ext}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Wrong file type. You can upload only png, jpg, jpeg")
     file.file.seek(0, 2)
     file_size = file.file.tell()
     if file_size > MAX_FILE_SIZE:

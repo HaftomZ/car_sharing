@@ -10,10 +10,7 @@ class User(BaseModel):
 
 
 class ReviewBase(BaseModel):
-    #rating: int
     text_description: str | None = None
-    #creator_id: int
-    #receiver_id: int
 
 
 class ReviewDisplay(BaseModel):
@@ -22,6 +19,6 @@ class ReviewDisplay(BaseModel):
     text_description: str
     creator_id: int
     receiver_id: int
-    photos: str
+    photos: str | None = ""
     class Config():
         orm_mode = True
