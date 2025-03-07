@@ -60,6 +60,7 @@ class userDisplay(BaseModel):
     trip: List[Trip] = []
     trip_booked: List[Booking] = []
     average_rating: float
+    reviews_received_count: int
 
 
 
