@@ -39,12 +39,13 @@ def create_review(db: Session, request: ReviewBase, user_rating: int, receiver_i
     db.commit()
     db.refresh(new_review)
     reviews_received = db.query(DbReview).filter(DbReview.receiver_id == receiver_id).all()
-    # reviews_received_count = len(reviews_received)
+    reviews_received_count = len(reviews_received)
     ratings = []
     for review in reviews_received:
         ratings.append(review.rating)
     average_rating = round(sum(ratings)/len(reviews_received), 1)
     receiver.average_rating = average_rating
+    receiver.reviews_received_count = reviews_received_count
     db.commit()
     db.refresh(receiver)
     return new_review
