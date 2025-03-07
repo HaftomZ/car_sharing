@@ -25,6 +25,7 @@ class DbUser(Base):
     trip = relationship("DbTrip", back_populates="user", cascade="all, delete-orphan")
     reviews_received_count = Column(Integer, nullable=True)
     payment = relationship("DbPayment", back_populates="user")
+    is_verified = Column(Boolean, default=False)
 
 
 

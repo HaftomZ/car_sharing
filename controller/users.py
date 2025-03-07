@@ -1,5 +1,6 @@
 from config.Hash import Hash
 from sqlalchemy.orm.session import Session
+from config.email_confirmation import send_verification_email, generate_email_token, verify_email_token
 from schemas.userSchema import UserBase
 from models.Users import DbUser
 from fastapi.responses import JSONResponse
@@ -7,6 +8,7 @@ import re
 from fastapi import HTTPException, status, File, UploadFile
 from pathlib import Path
 from config.pictures_handler import upload_picture
+
 
 def create_user(db: Session, request: UserBase):
     email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
@@ -40,10 +42,21 @@ def create_user(db: Session, request: UserBase):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    token = generate_email_token(request.email)
+    send_verification_email(request.email, token)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content={"message": "Account has been created!, Please Log in!"}
     )
+
+
+def verify_email(token: str, db: Session):
+    email = verify_email_token(token)
+    user = db.query(DbUser).filter(DbUser.email == email).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid token")
+    user.is_verified = True
+    db.commit()
 
 
 UPLOAD_DIR = Path("avatars")
