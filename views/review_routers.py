@@ -1,11 +1,11 @@
 from enum import Enum
 from schemas.reviewSchema import ReviewBase
-from fastapi import APIRouter, Depends, File, UploadFile, Form
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 from config.db_connect import get_db
 from controller import db_review
 from schemas.reviewSchema import ReviewDisplay
-from typing import List, Optional
+from typing import List
 
 
 router = APIRouter(
@@ -24,11 +24,8 @@ class UserRating(int, Enum):
 
 # Create review
 @router.post("/", response_model=ReviewDisplay)
-def create_review(user_rating: UserRating, receiver_id: int, creator_id: int, db: Session = Depends(get_db),
-                  text_description: Optional[str] = Form(None), files: Optional[list[UploadFile]] = File(None)):
-    if files is None:
-        files = []
-    return db_review.create_review(db, user_rating, receiver_id, creator_id, text_description, files)
+def create_review(request: ReviewBase, user_rating: UserRating, receiver_id: int, creator_id: int, db: Session = Depends(get_db)):
+    return db_review.create_review(db, request, user_rating, receiver_id, creator_id)
 
 
 @router.post("/{id}")
