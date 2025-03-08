@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 
@@ -59,8 +59,8 @@ class userDisplay(BaseModel):
     cars: List[Car] = []
     trip: List[Trip] = []
     trip_booked: List[Booking] = []
-    average_rating: float
-    reviews_received_count: int
+    average_rating: Optional[float] = None  
+    reviews_received_count: Optional[int] = None
 
 
 
