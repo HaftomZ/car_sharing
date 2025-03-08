@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
-from typing import List
+from typing import List, Optional
 from datetime import datetime
-from fastapi import File, UploadFile
+
 
 class Booking(BaseModel):
     booking_id: int
@@ -46,7 +46,6 @@ class UserBase(BaseModel):
     password: str
     about: str
     phone_number: str
-    avatar: str
 
 class userDisplay(BaseModel):
     id:int
@@ -60,9 +59,13 @@ class userDisplay(BaseModel):
     cars: List[Car] = []
     trip: List[Trip] = []
     trip_booked: List[Booking] = []
+    average_rating: Optional[float] = None  
+    reviews_received_count: Optional[int] = None
+
+
 
     class Config():
-        orm_mode = True
+        from_attributes = True
 
     
 

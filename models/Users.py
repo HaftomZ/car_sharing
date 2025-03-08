@@ -22,7 +22,10 @@ class DbUser(Base):
     left_reviews = relationship("DbReview", back_populates="creator", foreign_keys="[DbReview.creator_id]")
     received_reviews = relationship("DbReview", back_populates="receiver", foreign_keys="[DbReview.receiver_id]",
                                     cascade="all, delete-orphan")
-   
     trip = relationship("DbTrip", back_populates="user", cascade="all, delete-orphan")
+    reviews_received_count = Column(Integer, nullable=True)
     payment = relationship("DbPayment", back_populates="user")
+    is_verified = Column(Boolean, default=False)
+
+
 

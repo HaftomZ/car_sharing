@@ -10,9 +10,15 @@ router = APIRouter(
 )
 
 
-@router.post('/', response_model= userDisplay)
-def create_user(req: UserBase, db: Session= Depends(get_db)):
+@router.post('/', response_model=userDisplay)
+def create_user(req: UserBase, db: Session = Depends(get_db)):
     return users.create_user(db, req)
+
+
+@router.get("/verify")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    return users.verify_email(token, db)
+
 
 @router.post("/{id}")
 def upload_avatar(id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
