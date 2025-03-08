@@ -54,17 +54,16 @@ def login_admin(db: Session, email: str, password: str):
 
 
 def update_admin(db: Session, id:int, request: AdminBase, admin_role: str):    
-    admin = db.query(DbAdmin).filter(DbAdmin.id == id)
-    if not admin.first():
+    admin = db.query(DbAdmin).filter(DbAdmin.id == id).first()
+    if not admin:
          raise HTTPException(status_code= status.HTTP_404_NOT_FOUND,
                              detail = f'admin with id {id} is not exist!')
-    admin.update({        
-        DbAdmin.username : request.username,
-        DbAdmin.email: request.email,
-        DbAdmin.password: Hash.bcrypt(request.password),  
-        DbAdmin.role: admin_role ,             
-    })
+    admin.username = request.username
+    admin.email = request.email
+    admin.password = Hash.bcrypt(request.password)
+    admin.role = admin_role
     db.commit()
+    db.refresh(admin)
     return 'admin information has been updated successfully!'
 
 def delete_admin(db: Session, id: int):
@@ -74,4 +73,7 @@ def delete_admin(db: Session, id: int):
     
     db.delete(admin)
     db.commit()
-    return {"message": "Admin deleted successfully!"}
+    return JSONResponse(
+        status_code=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION,
+        content={"message": "Admin account has been deleted!"}
+    )

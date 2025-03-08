@@ -1,13 +1,14 @@
 from config.Hash import Hash
 from sqlalchemy.orm.session import Session
 from config.email_confirmation import send_verification_email, generate_email_token, verify_email_token
-from schemas.userSchema import UserBase
+from schemas.userSchema import UserBase, userDisplay
 from models.Users import DbUser
 from fastapi.responses import JSONResponse
 import re
 from fastapi import HTTPException, status, File, UploadFile
 from pathlib import Path
 from config.pictures_handler import upload_picture
+from typing import List
 
 
 def create_user(db: Session, request: UserBase):
@@ -77,7 +78,7 @@ def upload_avatar(db: Session, id: int, file: UploadFile = File(...)):
     return user
 
 
-def get_all_users(db:Session):
+def get_all_users(db:Session)-> List[userDisplay]:
     all_users = db.query(DbUser).all()
     if not all_users:
         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'there are no users found!')
@@ -107,18 +108,24 @@ def update_user(db: Session, id:int, request: UserBase):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="About section cannot be more than 50 characters!."
         )
-    user = db.query(DbUser).filter(DbUser.id == id)
-    if not user.first():
+    user = db.query(DbUser).filter(DbUser.id == id).first()
+
+    if not user:
          raise HTTPException(status_code= status.HTTP_404_NOT_FOUND,
                              detail = f'user with id {id} is not exist!')
-    user.update({
-        DbUser.user_name : request.username,
-        DbUser.email: request.email,
-        DbUser.password: Hash.bcrypt(request.password),
-        DbUser.about: request.about,
-        DbUser.phone_number: request.phone_number,
-    })
+    
+    if user.id != id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f'You do not have rights to update this user'
+        )
+    user.user_name = request.username
+    user.email = request.email
+    user.password = Hash.bcrypt(request.password)
+    user.about = request.about
+    user.phone_number = request.phone_number
     db.commit()
+    db.refresh(user)
     return 'user information has been updated successfully!'
 
 def delete_user(db: Session, id: int):
@@ -128,4 +135,7 @@ def delete_user(db: Session, id: int):
                              detail = f'user with id {id} is not exist!')
     db.delete(user)
     db.commit()
-    return 'user has been deleted!'
+    return JSONResponse(
+        status_code=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION,
+        content={"message": "User account has been deleted!"}
+    )
