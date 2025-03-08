@@ -116,6 +116,10 @@ def update_trip(db: Session,request: TripBase, trip_id: int):
     if not trip.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You do not have a trip with id {trip_id}')
     
+    #check the status of the trip
+    if trip.first().status != TripStatus.scheduled:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail= f'You can not update trip {trip_id} when its status is {trip.first().status}')
+    
     #check if the car that the user wants to move this trip for, is exsited
     car= db.query(DbCar).filter(DbCar.owner_id == request.creator_id, DbCar.id == request.car_id).first()
     if not car:
