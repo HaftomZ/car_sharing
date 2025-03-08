@@ -15,13 +15,13 @@ def create_token(request: OAuth2PasswordRequestForm, db: Session):
     admin = db.query(DbAdmin).filter(DbAdmin.username == request.username).first()
 
     if user:
-        if not Hash.verify(user.password, request.password):
+        if not Hash.Hash.verify(user.password, request.password):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid password")
         access_token = oauth2.create_access_token(data={"sub": str(user.id), "role": "user"})
         return {"access_token": access_token}
 
     elif admin:
-        if not Hash.verify(admin.password, request.password):
+        if not Hash.Hash.verify(admin.password, request.password):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid password")
         access_token = oauth2.create_access_token(data={"sub": str(admin.id), "role": "admin"})
         return {"access_token": access_token}
