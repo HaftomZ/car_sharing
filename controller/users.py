@@ -128,4 +128,7 @@ def delete_user(db: Session, id: int):
                              detail = f'user with id {id} is not exist!')
     db.delete(user)
     db.commit()
-    return 'user has been deleted!'
+    return JSONResponse(
+        status_code=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION,
+        content={"message": "User account has been deleted!"}
+    )
