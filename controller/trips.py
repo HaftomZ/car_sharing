@@ -1,5 +1,7 @@
 from models.Trips import DbTrip
 from models.Cars import DbCar
+from models.Booking import DbBooking
+from models.Payment import DbPayment
 from sqlalchemy.orm.session import Session
 from schemas.tripSchema import TripBase
 from fastapi import HTTPException , status
@@ -100,11 +102,17 @@ def delete_trip(db: Session, user_id: int, trip_id: int):
     trip = db.query(DbTrip).filter(DbTrip.id == trip_id, DbTrip.creator_id == user_id).first()
     if not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'There is no trip with id {trip_id}')
-    
+    temp_booking = db.query(DbBooking).filter(DbBooking.trip_id == trip_id).all()
+    payments = db.query(DbPayment)
+    for all_status in temp_booking:
+        if all_status.status == "Confirmed":
+         payments.filter(DbPayment.booking_id == all_status.booking_id).first().refund_status = True
+
     db.delete(trip)
     db.commit()
+    
     return 'Your trip has been removed successfully!'
-
+  
 #get all trips that are related to a user
 def get_all_user_trips(db: Session, user_id: int):
    trips=  db.query(DbTrip).filter(DbTrip.creator_id == user_id).all()

@@ -11,4 +11,10 @@ router = APIRouter(
 
 @router.post('/')
 def payment_process(req:Paymentbase, db: Session= Depends(get_db)):
- return payment.process_payment(db,req)
+ return payment.create_payment(db,req)
+@router.get('/')
+def get_payments(user_id:int=None,db: Session= Depends(get_db)):
+ return payment.get_payments(db,user_id)
+@router.get('/{id}')
+def get_a_payment(payment_id : int, db: Session= Depends(get_db)):
+ return payment.get_a_payment(db,payment_id)
