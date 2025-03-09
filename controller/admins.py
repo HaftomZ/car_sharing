@@ -41,7 +41,7 @@ def login_admin(db: Session, email: str, password: str):
     if not admin:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Email is already exist! Create an account first!."
+            detail="Email is incorrect!."
         )
 
     if not Hash.verify(admin.password, password):  
@@ -74,6 +74,6 @@ def delete_admin(db: Session, id: int):
     db.delete(admin)
     db.commit()
     return JSONResponse(
-        status_code=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION,
+        status_code=status.HTTP_204_NO_CONTENT,
         content={"message": "Admin account has been deleted!"}
     )
