@@ -7,6 +7,7 @@ from schemas.tripSchema import TripBase , TripStatus
 from schemas.carSchema import CarAvailability
 from fastapi import HTTPException , status
 import datetime
+from datetime import timezone
 from sqlalchemy import  func 
 from controller import cars
 import requests
@@ -96,8 +97,8 @@ def create_trip(db: Session, request: TripBase):
         car_id = request.car_id,
         departure_location = request.departure_location.lower(),
         destination_location = request.destination_location.lower(),
-        departure_time = request.departure_time,
-        arrival_time = request.arrival_time,
+        departure_time = request.departure_time.astimezone(timezone.utc),
+        arrival_time = request.arrival_time.astimezone(timezone.utc),
         available_adult_seats = request.available_adult_seats,
         available_children_seats = request.available_children_seats,
         cost = request.cost,
@@ -117,6 +118,10 @@ def update_trip(db: Session,request: TripBase, trip_id: int):
     if not trip.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You do not have a trip with id {trip_id}')
     
+    #check the status of the trip
+    if trip.first().status != TripStatus.scheduled:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail= f'You can not update trip {trip_id} when its status is {trip.first().status}')
+    
     #check if the car that the user wants to move this trip for, is exsited
     car= db.query(DbCar).filter(DbCar.owner_id == request.creator_id, DbCar.id == request.car_id).first()
     if not car:
@@ -125,8 +130,8 @@ def update_trip(db: Session,request: TripBase, trip_id: int):
     trip_vaildation(db, request)
 
     #check the status 
-    if request.status.lower() not in [TripStatus.scheduled, TripStatus.ongoing, TripStatus.completed, TripStatus.cancelled]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid status {request.status}, it should be scheduled, ongoing, completed, or cancelled")
+    if request.status.lower() not in [TripStatus.scheduled, TripStatus.ongoing, TripStatus.completed]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid status {request.status}, it should be scheduled, ongoing or completed")
 
     #check if the user have a trip before with the same car and during the same time
     pervious_trip = db.query(DbTrip).filter(DbTrip.creator_id == request.creator_id, DbTrip.car_id == request.car_id, DbTrip.id != trip_id, DbTrip.departure_time<=request.departure_time, DbTrip.arrival_time>=request.departure_time).first()
@@ -137,8 +142,8 @@ def update_trip(db: Session,request: TripBase, trip_id: int):
     trip.update({ 
         DbTrip.departure_location : request.departure_location.lower(),
         DbTrip.destination_location : request.destination_location.lower(),
-        DbTrip.departure_time : request.departure_time,
-        DbTrip.arrival_time : request.arrival_time,
+        DbTrip.departure_time : request.departure_time.astimezone(timezone.utc),
+        DbTrip.arrival_time : request.arrival_time.astimezone(timezone.utc),
         DbTrip.available_adult_seats : request.available_adult_seats,
         DbTrip.available_children_seats : request.available_children_seats,
         DbTrip.cost: request.cost,
@@ -153,7 +158,7 @@ def update_trip(db: Session,request: TripBase, trip_id: int):
         car_status = CarAvailability.in_use
         cars.update_car_availability_status(db, request.creator_id, request.car_id , car_status)
 
-    elif request.status.lower() in [TripStatus.cancelled , TripStatus.scheduled , TripStatus.completed]:
+    elif request.status.lower() in [TripStatus.scheduled , TripStatus.completed]:
         car_status = CarAvailability.available
         cars.update_car_availability_status(db, request.creator_id, request.car_id , car_status)
     
@@ -165,17 +170,18 @@ def update_trip(db: Session,request: TripBase, trip_id: int):
 
 #delete trip
 def delete_trip(db: Session, user_id: int, trip_id: int):
-    trip = db.query(DbTrip).filter(DbTrip.id == trip_id, DbTrip.creator_id == user_id).first()
-    if not trip:
+    trip = db.query(DbTrip).filter(DbTrip.id == trip_id, DbTrip.creator_id == user_id)
+    if not trip.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'There is no trip with id {trip_id}')
-    temp_booking = db.query(DbBooking).filter(DbBooking.trip_id == trip_id).all()
-    payments = db.query(DbPayment)
-    for all_status in temp_booking:
-        if all_status.status == "Confirmed":
-         payments.filter(DbPayment.booking_id == all_status.booking_id).first().refund_status = True
-
-    db.delete(trip)
-    db.commit()
+    
+    if trip.first().status != TripStatus.cancelled:
+        trip.update({ 
+            DbTrip.status : TripStatus.cancelled,
+            DbTrip.updated_at : func.now()
+             })
+        car_status = CarAvailability.available
+        cars.update_car_availability_status(db, user_id, trip.first().car_id , car_status)
+        db.commit()
     return 
 
 #get all trips that are related to a user
