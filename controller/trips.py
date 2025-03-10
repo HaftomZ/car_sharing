@@ -1,5 +1,7 @@
 from models.Trips import DbTrip
 from models.Cars import DbCar
+from models.Booking import DbBooking
+from models.Payment import DbPayment
 from sqlalchemy.orm.session import Session
 from schemas.tripSchema import TripBase , TripStatus
 from schemas.carSchema import CarAvailability
@@ -181,7 +183,6 @@ def delete_trip(db: Session, user_id: int, trip_id: int):
         cars.update_car_availability_status(db, user_id, trip.first().car_id , car_status)
         db.commit()
     return 
-
 
 #get all trips that are related to a user
 def get_all_user_trips(db: Session, user_id: int):
