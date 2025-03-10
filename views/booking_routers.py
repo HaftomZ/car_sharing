@@ -1,5 +1,5 @@
 from schemas.bookingSchema import*
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,status
 from sqlalchemy.orm import Session
 from config.db_connect import get_db
 from controller import booking
@@ -11,11 +11,11 @@ router = APIRouter(
     tags=['booking']
 )
 
-@router.post('/', response_model=BookingDisplay)
+@router.post('/', response_model=BookingDisplay, status_code=status.HTTP_201_CREATED)
 def create_booking(req: BookingBase, booker_id:int, trip_id: int,db: Session= Depends(get_db)):
     return booking.create_booking(db,  booker_id, trip_id,req)
   
-@router.delete('/{id}')
+@router.delete('/{id}',status_code=status.HTTP_204_NO_CONTENT)
 def cancel_booking(booker_id:int,booking_id: int, db: Session= Depends(get_db)):
     return booking.cancel_booking(db,booker_id,booking_id)
 
