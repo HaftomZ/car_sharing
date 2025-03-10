@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 # from models.Cars import DbCar
 # from models.Reviews import DbReview
 # from models.Booking import DbBooking
+#from models.Reports import DbReport
 
 class DbUser(Base):
     __tablename__ = 'users'
@@ -26,6 +27,8 @@ class DbUser(Base):
     reviews_received_count = Column(Integer, nullable=True)
     payment = relationship("DbPayment", back_populates="user")
     is_verified = Column(Boolean, default=False)
+    created_reports = relationship("DbReport", back_populates="creator", foreign_keys="[DbReport.creator_id]")
+    received_reports = relationship("DbReport", back_populates="reported", foreign_keys="[DbReport.reported_id]")
 
 
 

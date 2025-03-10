@@ -1,5 +1,4 @@
 from enum import Enum
-
 from schemas.adminSchema import AdminBase, AdminDisplay
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -29,7 +28,7 @@ def get_admin(email: str, password: str, db: Session = Depends(get_db)):
 
 @router.put('/{id}')
 def update_admin(admin_role: AdminRole, id: int, request: AdminBase, db: Session = Depends(get_db)):
-    return admins.update_admin(db, id, admin_role, request)
+    return admins.update_admin(db, id, request, admin_role.value )
 
 @router.delete("/{id}")
 def delete_admin(id: int, db: Session = Depends(get_db)):

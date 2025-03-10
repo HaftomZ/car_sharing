@@ -1,11 +1,13 @@
 from sqlalchemy.orm.session import Session
 from schemas.carSchema import CarBase
 from models.Cars import DbCar
+from models.Users import DbUser
 from fastapi import HTTPException , status
 import requests
 import datetime
 import re
 from sqlalchemy.exc import IntegrityError
+from schemas.carSchema import CarAvailability
 
 def car_validation(request: CarBase):
 
@@ -20,21 +22,10 @@ def car_validation(request: CarBase):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f'Model car {request.model} is not a valid model')
 
     #check license plate according to Dutch patterns
-    # XX-99-99
-    # 99-99-XX
-    # 99-XX-99
-    # XX-99-XX
-    # XX-XX-99
-    # 99-XX-XX
-    # 99-XXX-9
-    # 9-XXX-99
-    # XX-999-X
-    # X-999-XX
-    # XXX-99-X
-    # 9-XX-999
-    pattern = r"(\w{2}-\d{2}-\d{2})|(\d{2}-\d{2}-\w{2})|(\d{2}-\w{2}-\d{2})|(\w{2}-\d{2}-\w{2})|(\w{2}-\w{2}-\d{2})|(\d{2}-\w{2}-\w{2})|(\d{2}-\w{3}-\d{1})|(\d{1}-\w{3}-\d{2})|(\w{2}-\d{3}-\w{1})|(\w{1}-\d{3}-\w{2})|(\w{3}-\d{2}-\w{1})|(\d{1}-\w{2}-\d{3})"
-    if not re.match(pattern, request.license_plate):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid license plate {request.license_plate}")
+    # XX-99-99 / 99-99-XX / 99-XX-99 / XX-99-XX / XX-XX-99 / 99-XX-XX / 99-XXX-9 / 9-XXX-99 / XX-999-X / X-999-XX / XXX-99-X / 9-XX-999
+    # pattern = r"(\w{2}-\d{2}-\d{2})|(\d{2}-\d{2}-\w{2})|(\d{2}-\w{2}-\d{2})|(\w{2}-\d{2}-\w{2})|(\w{2}-\w{2}-\d{2})|(\d{2}-\w{2}-\w{2})|(\d{2}-\w{3}-\d{1})|(\d{1}-\w{3}-\d{2})|(\w{2}-\d{3}-\w{1})|(\w{1}-\d{3}-\w{2})|(\w{3}-\d{2}-\w{1})|(\d{1}-\w{2}-\d{3})"
+    # if not re.match(pattern, request.license_plate):
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid license plate {request.license_plate}")
     
 
     # Check if the year is a 4 digit number within a valid range
@@ -47,12 +38,15 @@ def car_validation(request: CarBase):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid total seats {request.total_seats}. Must be between 1 and 7")
     
     #check the availability status
-    if request.car_availability_status.lower() not in ["available" , "unavailable"]:
+    if request.car_availability_status.lower() not in [CarAvailability.available , CarAvailability.unavailable]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid availability {request.car_availability_status}, it should be available or unavailable")
 
     
 #create car
 def create_car(db: Session, request: CarBase):
+    user = db.query(DbUser).filter(DbUser.id == request.owner_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"Owner {request.owner_id} is not existed")
 
     car_validation(request)
 
@@ -78,18 +72,28 @@ def create_car(db: Session, request: CarBase):
 
     return new_car
 
-#get all cars that are related to a user
-def get_all_user_cars(db: Session, user_id: int):
-   cars=  db.query(DbCar).filter(DbCar.owner_id == user_id).all()
-   if not cars:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='There are no cars found!')
-   return cars
+#get all cars 
+def get_all_cars(db: Session, user_id: int):
+    car_query = db.query(DbCar)
+    if user_id is not None:
+        car_query = car_query.filter(DbCar.owner_id == user_id)
+   
+    return car_query.all()
+
+
+#get car
+def get_car(db: Session, id: int):
+   car =  db.query(DbCar).filter(DbCar.id == id).first()
+   if not car:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Car {id} not found')
+   return car
+
 
 #update car details
-def update_user_car(db: Session , car_id: int, request: CarBase):
+def update_car(db: Session , car_id: int, request: CarBase):
     car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == request.owner_id)
     if not car.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You does not have a car with id {car_id}')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You do not have a car with id {car_id}')
     
     car_validation(request)
 
@@ -110,7 +114,7 @@ def update_user_car(db: Session , car_id: int, request: CarBase):
     return updated_car
 
 #delete car
-def delete_user_car(db: Session, user_id: int, car_id: int):
+def delete_car(db: Session, user_id: int, car_id: int):
     car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == user_id).first()
     if not car:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You does not have a car with id {car_id}')

@@ -1,4 +1,11 @@
 from pydantic import BaseModel
+from enum import Enum
+
+class CarAvailability(str, Enum):
+    available = "available"
+    unavailable = "unavailable"
+    in_use = "in use"
+    booked = "booked"
 
 class CarBase(BaseModel): 
     model : str
@@ -9,7 +16,7 @@ class CarBase(BaseModel):
     wifi_available : bool
     air_conditioning : bool
     pet_friendly : bool
-    car_availability_status: str
+    car_availability_status: CarAvailability
     owner_id : int
 
 #User inside CarDispaly
@@ -24,6 +31,7 @@ class User(BaseModel):
 
 class CarDisplay(BaseModel): 
     id:int
+    owner_id: int #this is instead of returning user object
     model : str
     license_plate : str
     year : int
