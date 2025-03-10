@@ -15,7 +15,7 @@ def create_payment(db:Session, request:Paymentbase):
     if temp_bookings:
      
      trip = db.query(DbTrip).filter(DbTrip.id == temp_bookings.trip_id).first()
-     if not trip:
+     if trip.status=="cancelled":
          raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND,detail= "trip is cancelled")
      total_cost = trip.cost *(temp_bookings.adult_seats + temp_bookings.children_seats)
      if request.amount != total_cost:

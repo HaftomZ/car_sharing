@@ -25,15 +25,12 @@ def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBas
         )
 
     trip = db.query(DbTrip).filter(DbTrip.id==trip_id)
-
-    if  not trip.first():
-         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "The trip is cancelled")
     trip_departure_time = trip.first().departure_time.replace(tzinfo=timezone.utc)
-    grace_time =  trip_departure_time - datetime.now(timezone.utc)
-        
+    grace_time =  trip_departure_time - datetime.now(timezone.utc)  
     if grace_time <=timedelta(seconds=0):
            raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail="You can't book the trip, grace time is over")
-    
+    if  trip.first().status =="cancelled":
+         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "The trip was cancelled")
     temp_booking = db.query(DbBooking).filter(DbBooking.trip_id == trip_id, DbBooking.booker_id == booker_id).first()
     if temp_booking:
           raise  HTTPException(status_code= status.HTTP_409_CONFLICT, detail= 'You have already boooked the trip!')
@@ -97,14 +94,16 @@ def cancel_booking(db: Session, booker_id:int, booking_id:int):
         if not booking_tobe_cancelled:
              raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="No booking found")
         trip=db.query(DbTrip).filter(DbTrip.id == booking_tobe_cancelled.trip_id)
-        if not trip.first():
-            raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="The trip is already cancelled")
         
         trip_departure_time = trip.first().departure_time.replace(tzinfo=timezone.utc)
         grace_time =  trip_departure_time - datetime.now(timezone.utc)
         
         if grace_time <=timedelta(seconds=0):
            raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail="you can't cancel, grace time is over")
+        
+        if  trip.first().status =="cancelled":
+           raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "The trip was cancelled")
+        
         trip.first().available_adult_seats+=booking_tobe_cancelled.adult_seats
         trip.first().available_children_seats+=booking_tobe_cancelled.children_seats
         trip.first().passengers_count -= (booking_tobe_cancelled.adult_seats + booking_tobe_cancelled.children_seats)
@@ -113,13 +112,16 @@ def cancel_booking(db: Session, booker_id:int, booking_id:int):
                DbTrip.available_children_seats: trip.first().available_children_seats,
                DbTrip.passengers_count : trip.first().passengers_count
            })
+        
         update_car = cars.update_car_availability_status(
                                             db,trip.first().creator_id,
                                             trip.first().car_id, car_status ="available"
                                             )
+        
         payment_refund = db.query(DbPayment).filter(DbPayment.booking_id == booking_id, DbPayment.user_id == booker_id).first()
         if payment_refund:
             payment_refund.refund_status = True
+
         db.delete(booking_tobe_cancelled )
         db.commit()
        
@@ -127,7 +129,7 @@ def cancel_booking(db: Session, booker_id:int, booking_id:int):
 
 
 
-# Todo: After updating a booking, the available seats and car availabilty has to be updated.
+# After updating a booking, the available seats and car availabilty has to be updated.
 def update_my_bookings(db: Session, booker_id:int, booking_id: int, request: BookingBase):
 
     booking_tobe_update = db.query(DbBooking).filter(DbBooking.booking_id == booking_id,DbBooking.booker_id == booker_id)
@@ -135,12 +137,10 @@ def update_my_bookings(db: Session, booker_id:int, booking_id: int, request: Boo
     if not booking_tobe_update.first():
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "Booking not found")
     
-    if booking_tobe_update.first().status == "Confirmed": 
-       raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail="You can't update, payment has been made")
-    
     trip = db.query(DbTrip).filter(DbTrip.id == booking_tobe_update.first().trip_id)
-    if not trip.first():
-            raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="The trip is cancelled, no update available")
+
+    if  trip.first().status =="cancelled":
+         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "The trip was cancelled")
     
     trip_departure_time = trip.first().departure_time.replace(tzinfo=timezone.utc)
     grace_time =  trip_departure_time - datetime.now(timezone.utc)
@@ -148,35 +148,44 @@ def update_my_bookings(db: Session, booker_id:int, booking_id: int, request: Boo
     if grace_time <=timedelta(seconds=0):
         raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail="you can't update, grace time is over")
     
-    adult_seats_diff = request.adult_seats - booking_tobe_update.first().adult_seats
-    children_seats_diff = request.children_seats - booking_tobe_update.first().children_seats
+    if booking_tobe_update.first().status == "Confirmed": 
+        allowed_updates = {"pickup_location", "end_location"}
+        
+        # Only update allowed fields, ignore others
+        for key in allowed_updates:
+            if hasattr(request, key) and getattr(request, key) is not None:
+                setattr(booking_tobe_update.first(), key, getattr(request, key))
+     
+    else:
+     adult_seats_diff = request.adult_seats - booking_tobe_update.first().adult_seats
+     children_seats_diff = request.children_seats - booking_tobe_update.first().children_seats
 
-    if (trip.first().available_adult_seats - adult_seats_diff) < 0:
+     if (trip.first().available_adult_seats - adult_seats_diff) < 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail=f"Not enough available adult seats. There are only {trip.first().available_adult_seats} seats"
         )
     
-    if (trip.first().available_children_seats - children_seats_diff) < 0:
+     if (trip.first().available_children_seats - children_seats_diff) < 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail= f"Not enough available children seats.there are only {trip.first().available_children_seats} seats"
         )
-    trip.first().available_adult_seats -= adult_seats_diff
-    trip.first().available_children_seats -= children_seats_diff
-    trip.first().passengers_count += (adult_seats_diff + children_seats_diff)
-    trip.update({
+     trip.first().available_adult_seats -= adult_seats_diff
+     trip.first().available_children_seats -= children_seats_diff
+     trip.first().passengers_count += (adult_seats_diff + children_seats_diff)
+     trip.update({
      DbTrip.available_adult_seats : trip.first().available_adult_seats,
      DbTrip.available_children_seats: trip.first().available_children_seats,
      DbTrip.passengers_count : trip.first().passengers_count
      })
-    booking_tobe_update.update({
+     booking_tobe_update.update({
         DbBooking.pickup_location : request.pickup_location,
         DbBooking.end_location:request.end_location,
         DbBooking.adult_seats : request.adult_seats,
         DbBooking.children_seats :request.children_seats
      })
-    db.commit()
+     db.commit()
     # after the available seats are all booked, the car status should be updated to not available
     if trip.first().available_adult_seats==0:          
             car_status ="Unavailable"
