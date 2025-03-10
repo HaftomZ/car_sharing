@@ -84,22 +84,6 @@ def get_all_users(db:Session)-> List[userDisplay]:
         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'there are no users found!')
     return all_users
 
-def login_user(db: Session, email: str, password: str):
-    user = db.query(DbUser).filter(DbUser.email == email).first()
-    
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Email is already exist! Create an account first!."
-        )
-
-    if not Hash.verify(user.password, password):  
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid password! Incorrect password."
-        )
-       
-    return user 
 
 def get_user_by_id(db: Session, id: int):
     user = db.query(DbUser).filter(DbUser.id == id).first()

@@ -29,10 +29,6 @@ def upload_avatar(id: int, file: UploadFile = File(...), db: Session = Depends(g
 def get_all_users(db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
     return users.get_all_users(db)
 
-@router.get('/login', response_model=userDisplay)
-def get_user(email: str, password: str, db: Session = Depends(get_db)):
-    return users.login_user(db, email, password)
-
 @router.get('/{id}', response_model=userDisplay)
 def get_user_by_id(id: int, db: Session = Depends(get_db)):
     return users.get_user_by_id(db, id)
