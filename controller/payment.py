@@ -1,6 +1,7 @@
 from models.Payment import DbPayment
 from models.Trips import DbTrip
 from models.Booking import DbBooking
+from models.Users import DbUser
 from sqlalchemy.orm.session import Session
 from schemas.paymentSchema import *
 from fastapi import HTTPException, status
@@ -56,8 +57,13 @@ def create_payment(db:Session, request:Paymentbase):
 def get_payments(db:Session,user_id:int):
     payments = db.query(DbPayment)
     if user_id is not None:
-        payments = payments.filter(DbPayment.user_id == user_id)
+      users = db.query(DbUser).filter(DbUser.id==user_id).first()
+      if not users:
+          raise  HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail="No such user ID") 
+      payments = payments.filter(DbPayment.user_id == user_id)
     return payments.all()
 def get_a_payment(db:Session,payment_id:int):
-    payments =db.query(DbPayment).filter(DbPayment.payment_id == payment_id).first()
+    payments = db.query(DbPayment).filter(DbPayment.payment_id == payment_id).first()
+    if not payments:
+        raise  HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail="No such payment ID") 
     return payments

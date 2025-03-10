@@ -179,6 +179,12 @@ def delete_trip(db: Session, user_id: int, trip_id: int):
             DbTrip.status : TripStatus.cancelled,
             DbTrip.updated_at : func.now()
              })
+        temp_booking =db.query(DbBooking).filter(DbBooking.trip_id == trip_id).all()
+        payments = db.query(DbPayment)
+        for all_status in temp_booking:
+            if all_status.status == "Confirmed":
+             payments.filter(DbPayment.booking_id == all_status.booking_id).first().refund_status = True
+             db.query(DbBooking).filter(DbBooking.booking_id == all_status.booking_id).first().status = "cancelled"
         car_status = CarAvailability.available
         cars.update_car_availability_status(db, user_id, trip.first().car_id , car_status)
         db.commit()
