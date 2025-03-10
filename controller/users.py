@@ -57,6 +57,7 @@ def verify_email(token: str, db: Session):
         raise HTTPException(status_code=400, detail="Invalid token")
     user.is_verified = True
     db.commit()
+    return "You email confirmed. Now you can log in and enjoy HRIN app"
 
 
 UPLOAD_DIR = Path("avatars")
