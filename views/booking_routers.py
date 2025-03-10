@@ -15,17 +15,18 @@ router = APIRouter(
 def create_booking(req: BookingBase, booker_id:int, trip_id: int,db: Session= Depends(get_db)):
     return booking.create_booking(db,  booker_id, trip_id,req)
   
-@router.delete('/{booking_id}')
-def cancel_booking(booking_id: int, db: Session= Depends(get_db)):
-    return booking.cancel_booking(db,booking_id)
+@router.delete('/{id}')
+def cancel_booking(booker_id:int,booking_id: int, db: Session= Depends(get_db)):
+    return booking.cancel_booking(db,booker_id,booking_id)
 
-@router.put('/{booking_id}')
-def update_my_bookings(booking_id: int, req: BookingBase, db: Session= Depends(get_db)):
-    return booking.update_my_bookings(db,booking_id, req)
+@router.put('/{id}')
+def update_my_bookings(booker_id:int,booking_id: int, req: BookingBase, db: Session= Depends(get_db)):
+    return booking.update_my_bookings(db,booker_id,booking_id, req)
 
-@router.get('/{user_id}', response_model= list[listBookingResponse])
-def list_my_bookings(user_id: int, db: Session= Depends(get_db)):
-    return booking.list_my_bookings(db, user_id)
-@router.get('/')
-def list_all_booking(db:Session=Depends(get_db)):
-    return booking.list_all_booking(db)
+@router.get('/', response_model= list[listBookingResponse])
+def list_of_bookings(user_id: int= None, db: Session= Depends(get_db)):
+    return booking.list_of_bookings(db, user_id)
+
+@router.get('/{id}')
+def get_a_booking(booking_id:int, db: Session= Depends(get_db)):
+    return booking.get_a_booking(db,booking_id)
