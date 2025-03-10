@@ -101,6 +101,17 @@ def login_user(db: Session, email: str, password: str):
        
     return user 
 
+def get_user_by_id(db: Session, id: int):
+    user = db.query(DbUser).filter(DbUser.id == id).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found!"
+        )
+       
+    return user
+
 
 def update_user(db: Session, id:int, request: UserBase):
     if len(request.about) >= 50:
