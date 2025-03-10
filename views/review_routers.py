@@ -33,6 +33,11 @@ def upload_photos(id: int, files: list[UploadFile] = File(...), db: Session = De
     return db_review.upload_photos(db, id, files)
 
 
+@router.delete('/{id}/photos')
+def delete_photos(id: int, db: Session = Depends(get_db)):
+    return db_review.delete_photos(db, id)
+
+
 # Read specific review
 @router.get("/{id}", response_model=ReviewDisplay)
 def get_review(id: int, db: Session = Depends(get_db)):

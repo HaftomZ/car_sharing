@@ -25,6 +25,10 @@ def verify_email(token: str, db: Session = Depends(get_db)):
 def upload_avatar(id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
     return users.upload_avatar(db, id, file)
 
+@router.delete("/{id}/avatar")
+def delete_avatar(id: int, db: Session = Depends(get_db)):
+    return users.delete_avatar(db, id)
+
 @router.get('/', response_model=list[userDisplay])
 def get_all_users(db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
     return users.get_all_users(db)
