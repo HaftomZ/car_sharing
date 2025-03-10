@@ -20,13 +20,14 @@ class BookingBase(BaseModel):
     class Config:
         orm_mode = True
 class listBookingResponse(BaseModel):
+    booker_id:int
     booking_id: int
     status: str
     created_at: datetime
     updated_at: datetime
     pickup_location: str
     end_location: str
-    trip: Trip_Details_In_Booking 
+    trip_id: int
     
      
     class Config:

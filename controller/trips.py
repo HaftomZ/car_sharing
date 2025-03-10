@@ -1,5 +1,7 @@
 from models.Trips import DbTrip
 from models.Cars import DbCar
+from models.Booking import DbBooking
+from models.Payment import DbPayment
 from sqlalchemy.orm.session import Session
 from schemas.tripSchema import TripBase , TripStatus
 from schemas.carSchema import CarAvailability
@@ -17,22 +19,12 @@ def trip_duration(departure_time: datetime, arrival_time: datetime):
 
 
 def city_name_validation(city_name: str):
-    # api_url = 'https://api.api-ninjas.com/v1/city?name={}'.format(city_name)
-    # response = requests.get(api_url, headers={'X-Api-Key': 'u6HXeCfNAwAIbH6BXUXdCg==ntvSIQMalRYRVEgb'})
-
-    # if response.status_code == requests.codes.ok:
-    #     if not response.json():
-    #         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f'Invalid city {city_name}')
-    #     if (response.json()[0]['name'].lower() != city_name.lower()):
-    #         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f'Invalid city {city_name}')
-    # else:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'something went wrong')
     if city_name.lower() == "string":  
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f'Invalid city {city_name}')
     
     api_url = f"https://nominatim.openstreetmap.org/search?q={city_name}&format=json"
     headers = {
-        "User-Agent": "car_sharing/1.0 (roula.arab95@gmail.com)" 
+        "User-Agent": "HRIN/1.0 (noreply.hrin@gmail.com)" 
     }
     response = requests.get(api_url, headers=headers)
 
@@ -177,18 +169,34 @@ def delete_trip(db: Session, user_id: int, trip_id: int):
             DbTrip.status : TripStatus.cancelled,
             DbTrip.updated_at : func.now()
              })
+        temp_booking =db.query(DbBooking).filter(DbBooking.trip_id == trip_id).all()
+        payments = db.query(DbPayment)
+        for all_status in temp_booking:
+            if all_status.status == "Confirmed":
+             payments.filter(DbPayment.booking_id == all_status.booking_id).first().refund_status = True
+             db.query(DbBooking).filter(DbBooking.booking_id == all_status.booking_id).first().status = "cancelled"
         car_status = CarAvailability.available
         cars.update_car_availability_status(db, user_id, trip.first().car_id , car_status)
         db.commit()
     return 
 
+#get all trips 
+def get_all_trips(db: Session, user_id: int):
+   trip_query = db.query(DbTrip)
+   if user_id is not None:
+        trip_query =  trip_query.filter(DbTrip.creator_id == user_id)
+   
+   return trip_query.all()
 
-#get all trips that are related to a user
-def get_all_user_trips(db: Session, user_id: int):
-   trips=  db.query(DbTrip).filter(DbTrip.creator_id == user_id).all()
-   if not trips:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='There are no trips found!')
-   return trips
+
+#get trip
+def get_trip(db: Session, id: int):
+    trip = db.query(DbTrip).filter(DbTrip.id == id).first()
+    if not trip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Trip {id} not found!')
+    
+    return trip
+
 
 
 #search for trip
