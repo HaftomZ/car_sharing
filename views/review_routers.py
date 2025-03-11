@@ -1,5 +1,4 @@
 from controller.authentication import get_current_user
-from schemas.adminSchema import AdminBase
 from schemas.reviewSchema import ReviewBase
 from fastapi import APIRouter, Depends, File, UploadFile, status
 from sqlalchemy.orm import Session

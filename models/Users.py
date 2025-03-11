@@ -14,6 +14,7 @@ class DbUser(Base):
     user_name = Column(String)
     email = Column(String, unique=True)
     password = Column(String)
+    is_admin = Column(Boolean, default=False)
     about = Column(String)
     avatar = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
@@ -27,8 +28,8 @@ class DbUser(Base):
     reviews_received_count = Column(Integer, nullable=True)
     payment = relationship("DbPayment", back_populates="user")
     is_verified = Column(Boolean, default=False)
-    created_reports = relationship("DbReport", back_populates="creator", foreign_keys="[DbReport.creator_id]")
-    received_reports = relationship("DbReport", back_populates="reported", foreign_keys="[DbReport.reported_id]")
+    # created_reports = relationship("DbReport", back_populates="creator", foreign_keys="[DbReport.creator_id]")
+    # received_reports = relationship("DbReport", back_populates="reported", foreign_keys="[DbReport.reported_id]")
 
 
 
