@@ -8,7 +8,6 @@ from enum import Enum
 from config.oauth2 import oauth2_scheme
 from controller.authentication import get_current_user
 from schemas.userSchema import UserBase , userDisplay
-from schemas.adminSchema import AdminBase
 
 router = APIRouter(
 prefix='/cars',

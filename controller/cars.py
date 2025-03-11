@@ -48,7 +48,8 @@ def create_car(db: Session, request: CarBase , current_user: userDisplay):
     user = db.query(DbUser).filter(DbUser.id == request.owner_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"Owner {request.owner_id} is not existed")
-    if user.id != current_user.id: 
+    
+    if user.id != current_user.id and not current_user.is_admin: 
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
     car_validation(request)
@@ -88,7 +89,7 @@ def get_all_cars(db: Session, user_id: int):
 def get_car(db: Session, id: int):
    car =  db.query(DbCar).filter(DbCar.id == id).first()
    if not car:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Car {id} not found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
    return car
 
 
@@ -96,10 +97,11 @@ def get_car(db: Session, id: int):
 def update_car(db: Session , car_id: int, request: CarBase, current_user: userDisplay):
     car = db.query(DbCar).filter(DbCar.id == car_id)
     if not car.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You do not have a car with id {car_id}')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     
-    if car.first().owner_id != current_user.id: #need to check also for admin
+    if car.first().owner_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    
     car_validation(request)
 
     car.update({ 
@@ -116,15 +118,16 @@ def update_car(db: Session , car_id: int, request: CarBase, current_user: userDi
         })
     db.commit()
 
-    updated_car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == request.owner_id).first()
+    updated_car = db.query(DbCar).filter(DbCar.id == car_id).first()
     return updated_car
 
 #delete car
 def delete_car(db: Session, car_id: int, current_user: userDisplay):
     car = db.query(DbCar).filter(DbCar.id == car_id).first()
     if not car:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You does not have a car with id {car_id}')
-    if car.owner_id != current_user.id:  #need to check for admin also
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    
+    if car.owner_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
     db.delete(car)
