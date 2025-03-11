@@ -1,5 +1,5 @@
 from schemas.userSchema import UserBase, userDisplay
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile, status
 from sqlalchemy.orm import Session
 from config.db_connect import get_db
 from controller import users
@@ -16,17 +16,12 @@ def create_user(req: UserBase, db: Session = Depends(get_db)):
     return users.create_user(db, req)
 
 
-@router.get("/{id}/verification/{token}")
-def verify_email(token: str, db: Session = Depends(get_db)):
-    return users.verify_email(token, db)
-
-
 @router.post("/{id}/avatar")
 def upload_avatar(id: int, file: UploadFile = File(...), db: Session = Depends(get_db),
                   current_user: userDisplay = Depends(get_current_user)):
     return users.upload_avatar(db, id, current_user, file)
 
-@router.delete("/{id}/avatar")
+@router.delete("/{id}/avatar", status_code=status.HTTP_204_NO_CONTENT)
 def delete_avatar(id: int, db: Session = Depends(get_db), current_user: userDisplay = Depends(get_current_user)):
     return users.delete_avatar(db, id, current_user)
 

@@ -49,7 +49,7 @@ def create_user(db: Session, request: UserBase):
     send_verification_email(request.email, token)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
-        content={"message": "Account has been created!, Please Log in!"}
+        content={"message": "Account has been created. Please confirm your email."}
     )
 
 
@@ -71,15 +71,16 @@ def upload_avatar(db: Session, id: int, current_user: userDisplay, file: UploadF
     user = db.query(DbUser).filter(DbUser.id == id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    if user.id != current_user.id:
+    if user.id == current_user.id or current_user.is_admin == 1:
+        old_avatar_path = Path(user.avatar)
+        if old_avatar_path.exists() and old_avatar_path != Path("avatars/default_avatar.jpg"):
+            old_avatar_path.unlink()
+        final_path = upload_picture(UPLOAD_DIR, file)
+        user.avatar = str(final_path)
+        db.commit()
+        db.refresh(user)
+    else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    old_avatar_path = Path(user.avatar)
-    if old_avatar_path.exists() and old_avatar_path != Path("avatars/default_avatar.jpg"):
-        old_avatar_path.unlink()
-    final_path = upload_picture(UPLOAD_DIR, file)
-    user.avatar = str(final_path)
-    db.commit()
-    db.refresh(user)
     return user
 
 
@@ -88,16 +89,17 @@ def delete_avatar(db: Session, id: int, current_user: userDisplay):
     if not user:
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                              detail=f'User with id {id} is not exist!')
-    if user.id != current_user.id:
+    if user.id == current_user.id or current_user.is_admin == 1:
+        avatar_path = Path(user.avatar)
+        if avatar_path == Path("avatars/default_avatar.jpg"):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f'You can not delete default avatar!')
+        avatar_path.unlink()
+        user.avatar = "avatars/default_avatar.jpg"
+        db.commit()
+        db.refresh(user)
+    else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    avatar_path = Path(user.avatar)
-    if avatar_path == Path("avatars/default_avatar.jpg"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f'You can not delete default avatar!')
-    avatar_path.unlink()
-    user.avatar = "avatars/default_avatar.jpg"
-    db.commit()
-    db.refresh(user)
     return user
 
 
