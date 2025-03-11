@@ -60,6 +60,14 @@ def get_review(db: Session, id: int):
 
 
 def get_all_reviews(db: Session, creator_id: int, receiver_id: int):
+    creator = db.query(DbUser).filter(DbUser.id == creator_id).first()
+    receiver = db.query(DbUser).filter(DbUser.id == receiver_id).first()
+    if not creator:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                             detail=f'None exist user can not create reviews')
+    if not receiver:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                             detail=f'None exist user can not receive reviews')
     review_query = db.query(DbReview)
     if creator_id is not None:
         review_query = review_query.filter(DbReview.creator_id == creator_id)

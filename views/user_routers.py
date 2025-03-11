@@ -22,15 +22,16 @@ def verify_email(token: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{id}/avatar")
-def upload_avatar(id: int, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: UserBase | AdminBase = Depends(get_current_user)):
-    return users.upload_avatar(db, id, file)
+def upload_avatar(id: int, file: UploadFile = File(...), db: Session = Depends(get_db),
+                  current_user: userDisplay = Depends(get_current_user)):
+    return users.upload_avatar(db, id, current_user, file)
 
 @router.delete("/{id}/avatar")
-def delete_avatar(id: int, db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
-    return users.delete_avatar(db, id)
+def delete_avatar(id: int, db: Session = Depends(get_db), current_user: userDisplay = Depends(get_current_user)):
+    return users.delete_avatar(db, id, current_user)
 
 @router.get('/', response_model=list[userDisplay])
-def get_all_users(db: Session = Depends(get_db), current_user: UserBase  = Depends(get_current_user)):
+def get_all_users(db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
     return users.get_all_users(db)
 
 @router.get('/{id}', response_model=userDisplay)
@@ -38,10 +39,11 @@ def get_user_by_id(id: int, db: Session = Depends(get_db), current_user: UserBas
     return users.get_user_by_id(db, id)
 
 @router.put('/{id}')
-def update_user(id: int, request: UserBase, db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
-    return users.update_user(db, id, request)
+def update_user(id: int, request: UserBase, db: Session = Depends(get_db),
+                current_user: userDisplay = Depends(get_current_user)):
+    return users.update_user(db, id, request, current_user)
 
 @router.delete('/{id}')
-def delete_user(id: int, db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
-    return users.delete_user(db, id)
+def delete_user(id: int, db: Session = Depends(get_db), current_user: userDisplay = Depends(get_current_user)):
+    return users.delete_user(db, id, current_user)
 

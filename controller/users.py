@@ -66,10 +66,12 @@ UPLOAD_DIR = Path("avatars")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
-def upload_avatar(db: Session, id: int, file: UploadFile = File(...)):
+def upload_avatar(db: Session, id: int, current_user: userDisplay, file: UploadFile = File(...)):
     user = db.query(DbUser).filter(DbUser.id == id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    if user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     old_avatar_path = Path(user.avatar)
     if old_avatar_path.exists() and old_avatar_path != Path("avatars/default_avatar.jpg"):
         old_avatar_path.unlink()
@@ -80,11 +82,13 @@ def upload_avatar(db: Session, id: int, file: UploadFile = File(...)):
     return user
 
 
-def delete_avatar(db: Session, id: int):
+def delete_avatar(db: Session, id: int, current_user: userDisplay):
     user = db.query(DbUser).filter(DbUser.id == id).first()
     if not user:
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                              detail=f'User with id {id} is not exist!')
+    if user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     avatar_path = Path(user.avatar)
     if avatar_path == Path("avatars/default_avatar.jpg"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -116,7 +120,7 @@ def get_user_by_id(db: Session, id: int):
     return user
 
 
-def update_user(db: Session, id:int, request: UserBase):
+def update_user(db: Session, id:int, request: UserBase, current_user: userDisplay):
     if len(request.about) >= 50:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -128,11 +132,8 @@ def update_user(db: Session, id:int, request: UserBase):
          raise HTTPException(status_code= status.HTTP_404_NOT_FOUND,
                              detail = f'user with id {id} is not exist!')
     
-    if user.id != id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f'You do not have rights to update this user'
-        )
+    if user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     user.user_name = request.username
     user.email = request.email
     user.password = Hash.bcrypt(request.password)
@@ -142,11 +143,12 @@ def update_user(db: Session, id:int, request: UserBase):
     db.refresh(user)
     return 'user information has been updated successfully!'
 
-def delete_user(db: Session, id: int):
+def delete_user(db: Session, id: int, current_user: userDisplay):
     user = db.query(DbUser).filter(DbUser.id == id).first()
     if not user:
-         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND,
-                             detail = f'user with id {id} is not exist!')
+         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND)
+    if user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     db.delete(user)
     db.commit()
     return JSONResponse(
