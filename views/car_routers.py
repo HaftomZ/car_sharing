@@ -39,5 +39,5 @@ def update_car(request: CarBase, id: int, db: Session=Depends(get_db), current_u
 
 #delete car that is related to a user
 @router.delete('/{id}' , status_code=status.HTTP_204_NO_CONTENT)
-def delete_car(id: int, user_id: int, db: Session=Depends(get_db), current_user: UserBase | AdminBase = Depends(get_current_user)):
-    return cars.delete_car(db, user_id, id)
+def delete_car(id: int, db: Session=Depends(get_db), current_user: UserBase | AdminBase = Depends(get_current_user)):
+    return cars.delete_car(db, id, current_user)

@@ -8,6 +8,7 @@ import datetime
 import re
 from sqlalchemy.exc import IntegrityError
 from schemas.carSchema import CarAvailability
+from schemas.userSchema import UserBase
 
 def car_validation(request: CarBase):
 
@@ -114,10 +115,12 @@ def update_car(db: Session , car_id: int, request: CarBase):
     return updated_car
 
 #delete car
-def delete_car(db: Session, user_id: int, car_id: int):
-    car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == user_id).first()
+def delete_car(db: Session, car_id: int, current_user: UserBase):
+    car = db.query(DbCar).filter(DbCar.id == car_id).first()
     if not car:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You does not have a car with id {car_id}')
+    # if car.owner_id != current_user.id:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail= 'The car can be deleted by the owner or admin only')
     
     db.delete(car)
     db.commit()
