@@ -8,7 +8,7 @@ import datetime
 import re
 from sqlalchemy.exc import IntegrityError
 from schemas.carSchema import CarAvailability
-from schemas.userSchema import UserBase
+from schemas.userSchema import UserBase , userDisplay
 
 def car_validation(request: CarBase):
 
@@ -44,11 +44,13 @@ def car_validation(request: CarBase):
 
     
 #create car
-def create_car(db: Session, request: CarBase):
+def create_car(db: Session, request: CarBase , current_user: userDisplay):
     user = db.query(DbUser).filter(DbUser.id == request.owner_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"Owner {request.owner_id} is not existed")
-
+    if user.id != current_user.id: 
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    
     car_validation(request)
 
     try:
@@ -91,11 +93,13 @@ def get_car(db: Session, id: int):
 
 
 #update car details
-def update_car(db: Session , car_id: int, request: CarBase):
-    car = db.query(DbCar).filter(DbCar.id == car_id, DbCar.owner_id == request.owner_id)
+def update_car(db: Session , car_id: int, request: CarBase, current_user: userDisplay):
+    car = db.query(DbCar).filter(DbCar.id == car_id)
     if not car.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You do not have a car with id {car_id}')
     
+    if car.first().owner_id != current_user.id: #need to check also for admin
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     car_validation(request)
 
     car.update({ 
@@ -107,7 +111,8 @@ def update_car(db: Session , car_id: int, request: CarBase):
         DbCar.wifi_available : request.wifi_available,
         DbCar.air_conditioning : request.air_conditioning,
         DbCar.pet_friendly : request.pet_friendly,
-        DbCar.car_availability_status : request.car_availability_status.lower()
+        DbCar.car_availability_status : request.car_availability_status.lower(),
+        DbCar.owner_id : request.owner_id
         })
     db.commit()
 
@@ -115,12 +120,12 @@ def update_car(db: Session , car_id: int, request: CarBase):
     return updated_car
 
 #delete car
-def delete_car(db: Session, car_id: int, current_user: UserBase):
+def delete_car(db: Session, car_id: int, current_user: userDisplay):
     car = db.query(DbCar).filter(DbCar.id == car_id).first()
     if not car:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You does not have a car with id {car_id}')
-    # if car.owner_id != current_user.id:
-    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail= 'The car can be deleted by the owner or admin only')
+    if car.owner_id != current_user.id:  #need to check for admin also
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
     db.delete(car)
     db.commit()
