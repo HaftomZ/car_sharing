@@ -14,7 +14,7 @@ class DbUser(Base):
     user_name = Column(String)
     email = Column(String, unique=True)
     password = Column(String)
-    is_admin = Column(Boolean)
+    is_admin = Column(Boolean, default=False)
     about = Column(String)
     avatar = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
