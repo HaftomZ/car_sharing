@@ -7,8 +7,8 @@ from fastapi import HTTPException
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USERNAME = "youremail@gmail.com"
-SMTP_PASSWORD = "App password"
+SMTP_USERNAME = "noreply.hrin@gmail.com"
+SMTP_PASSWORD = "tksd pynp dole gzyk"
 
 
 def send_verification_email(email: str, token: str):
