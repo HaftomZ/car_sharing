@@ -8,12 +8,14 @@ from fastapi import HTTPException, status
 from controller import cars
 from threading import Timer
 from datetime import datetime,timezone,timedelta
+from schemas.userSchema import UserBase,userDisplay
 
-
-def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBase):
+def create_booking(db: Session,request: BookingBase,current_user:int):
    
-    users = db.query(DbUser).filter(DbUser.id == booker_id).first()
-    trip = db.query(DbTrip).filter(DbTrip.id==trip_id)
+    if request.booker_id != current_user:
+        raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
+    users = db.query(DbUser).filter(DbUser.id == request.booker_id).first()
+    trip = db.query(DbTrip).filter(DbTrip.id==request.trip_id)
 
     if not trip.first():
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="No Trip found")
@@ -27,7 +29,7 @@ def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBas
     if grace_time <=timedelta(seconds=0):
            raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail="You can't book the trip, grace time is over")
    
-    temp_booking = db.query(DbBooking).filter(DbBooking.trip_id == trip_id, DbBooking.booker_id == booker_id).first()
+    temp_booking = db.query(DbBooking).filter(DbBooking.trip_id == request.trip_id, DbBooking.booker_id == request.booker_id).first()
     if temp_booking:
           raise  HTTPException(status_code= status.HTTP_409_CONFLICT, detail= 'You have already boooked the trip!')
     
@@ -53,8 +55,8 @@ def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBas
     else:
         raise  HTTPException(status_code= status.HTTP_409_CONFLICT, detail= 'Sorry the trip is fully boooked!')
     booking_tobe_created = DbBooking(
-        trip_id = trip_id,
-        booker_id = booker_id,
+        trip_id = request.trip_id,
+        booker_id = request.booker_id,
         pickup_location = request.pickup_location,
         end_location = request.end_location,
         adult_seats = request.adult_seats,
@@ -72,7 +74,7 @@ def create_booking(db: Session, booker_id:int, trip_id: int, request: BookingBas
                                             trip.first().car_id, car_status="Unavailable"
                                             )
     
-    Timer(60, release_seat_if_payment_fails, args=[booker_id, trip_id, db]).start()
+    Timer(60, release_seat_if_payment_fails, args=[request.booker_id, request.trip_id, db]).start()
     
     return booking_tobe_created
 
@@ -97,10 +99,11 @@ def release_seat_if_payment_fails(booker_id : int, trip_id : int, db:Session):
        db.delete(temp_booking)  
        db.commit()
 #After cancelling the booking, the seats that were booked must be released and car availablity must be updated.
-def cancel_booking(db: Session, booker_id:int, booking_id:int):
+def cancel_booking(db: Session, booking_id:int, current_user: int):
         
-        booking_tobe_cancelled = db.query(DbBooking).filter(DbBooking.booking_id == booking_id,DbBooking.booker_id == booker_id).first()
-       
+        booking_tobe_cancelled = db.query(DbBooking).filter(DbBooking.booking_id == booking_id).first()
+        if booking_tobe_cancelled.booker_id != current_user:
+            raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
         if not booking_tobe_cancelled:
              raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="No booking found")
         
@@ -130,7 +133,7 @@ def cancel_booking(db: Session, booker_id:int, booking_id:int):
                                             trip.first().car_id, car_status ="available"
                                             )
         
-         payment_refund = db.query(DbPayment).filter(DbPayment.booking_id == booking_id, DbPayment.user_id == booker_id).first()
+         payment_refund = db.query(DbPayment).filter(DbPayment.booking_id == booking_id).first()
          if payment_refund:
             payment_refund.refund_status = True
 
@@ -142,10 +145,11 @@ def cancel_booking(db: Session, booker_id:int, booking_id:int):
 
 
 # After updating a booking, the available seats and car availabilty has to be updated.
-def update_my_bookings(db: Session, booker_id:int, booking_id: int, request: BookingBase):
+def update_my_bookings(db: Session,booking_id: int, request: BookingBase,current_user:int):
 
-    booking_tobe_update = db.query(DbBooking).filter(DbBooking.booking_id == booking_id,DbBooking.booker_id == booker_id)
-
+    booking_tobe_update = db.query(DbBooking).filter(DbBooking.booking_id == booking_id)
+    if booking_tobe_update.first().booker_id != current_user:
+        raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
     if not booking_tobe_update.first():
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "Booking not found")
     
@@ -207,16 +211,20 @@ def update_my_bookings(db: Session, booker_id:int, booking_id: int, request: Boo
 
     return booking_tobe_update.first()
    
-def list_of_bookings(db: Session, user_id: int):
+def list_of_bookings(db: Session, user_id: int, current_id: int):
     lists= db.query(DbBooking)
     if user_id is not None:
       users = db.query(DbUser).filter(DbUser.id==user_id).first()
+      if user_id != current_id:
+          raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
       if not users:
           raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="No such user ID") 
       lists = lists.filter(DbBooking.booker_id == user_id)
     return lists.all()
-def get_a_booking(db: Session, booking_id: int):
+def get_a_booking(db: Session, booking_id: int, current_id : int):
      lists = db.query(DbBooking).filter(DbBooking.booking_id == booking_id).first()
+     if lists.booker_id != current_id:
+         raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
      if not lists:
       raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "No such booking ID")
      return lists

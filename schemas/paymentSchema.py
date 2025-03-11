@@ -8,6 +8,7 @@ class Paymentbase(BaseModel):
     payment_method: str
 
 class PaymentResponse(BaseModel):
+    payment_id: int
     message: str
     transaction_id: str
     status: str

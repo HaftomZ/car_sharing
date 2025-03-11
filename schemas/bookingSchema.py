@@ -11,6 +11,8 @@ class Trip_Details_In_Booking(BaseModel):
    class Config:
         orm_mode = True
 class BookingBase(BaseModel):
+    booker_id : int
+    trip_id: int
     pickup_location: str
     end_location: str
     adult_seats: int
