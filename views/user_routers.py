@@ -17,12 +17,12 @@ def create_user(req: UserBase, db: Session = Depends(get_db)):
     return users.create_user(db, req)
 
 
-@router.get("/verify")
+@router.get("/{id}/verification/{token}")
 def verify_email(token: str, db: Session = Depends(get_db)):
     return users.verify_email(token, db)
 
 
-@router.post("/{id}")
+@router.post("/{id}/avatar")
 def upload_avatar(id: int, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: UserBase | AdminBase = Depends(get_current_user)):
     return users.upload_avatar(db, id, file)
 
