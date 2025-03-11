@@ -46,13 +46,13 @@ class UserBase(BaseModel):
     password: str
     about: str
     phone_number: str
-    is_admin: bool = False
+    is_admin: bool = 0
 
 class userDisplay(BaseModel):
     id:int
     user_name: str
     email: EmailStr
-    is_admin : bool = False
+    is_admin: bool = 0
     about: str | None = None
     avatar: str | None = None
     phone_number: str | None = None
