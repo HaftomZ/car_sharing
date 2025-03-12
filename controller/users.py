@@ -100,7 +100,7 @@ def delete_avatar(db: Session, id: int, current_user: userDisplay):
         db.refresh(user)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    return user
+    return
 
 
 
