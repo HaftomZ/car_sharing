@@ -5,6 +5,7 @@ from models.Payment import DbPayment
 from sqlalchemy.orm.session import Session
 from schemas.tripSchema import TripBase , TripStatus
 from schemas.carSchema import CarAvailability
+from schemas.userSchema import userDisplay
 from fastapi import HTTPException , status
 import datetime
 from datetime import timezone
@@ -102,7 +103,7 @@ def create_trip(db: Session, request: TripBase):
 
 
 #update trip details
-def update_trip(db: Session,request: TripBase, trip_id: int):
+def update_trip(db: Session,request: TripBase, trip_id: int, current_user: userDisplay):
 
     trip = db.query(DbTrip).filter(DbTrip.creator_id == request.creator_id, DbTrip.id == trip_id)
     if not trip.first():
@@ -159,10 +160,13 @@ def update_trip(db: Session,request: TripBase, trip_id: int):
 
 
 #delete trip
-def delete_trip(db: Session, user_id: int, trip_id: int):
-    trip = db.query(DbTrip).filter(DbTrip.id == trip_id, DbTrip.creator_id == user_id)
+def delete_trip(db: Session, trip_id: int, current_user: userDisplay):
+    trip = db.query(DbTrip).filter(DbTrip.id == trip_id)
     if not trip.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'There is no trip with id {trip_id}')
+    
+    if trip.first().creator_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
     if trip.first().status != TripStatus.cancelled:
         trip.update({ 
@@ -176,7 +180,7 @@ def delete_trip(db: Session, user_id: int, trip_id: int):
              payments.filter(DbPayment.booking_id == all_status.booking_id).first().refund_status = True
              db.query(DbBooking).filter(DbBooking.booking_id == all_status.booking_id).first().status = "cancelled"
         car_status = CarAvailability.available
-        cars.update_car_availability_status(db, user_id, trip.first().car_id , car_status)
+        cars.update_car_availability_status(db, trip.first().creator_id, trip.first().car_id , car_status)
         db.commit()
     return 
 
