@@ -17,7 +17,7 @@ tags=['cars']
 #create car for a user
 @router.post('/', response_model=CarDisplay , status_code=status.HTTP_201_CREATED)
 def create_car(request: CarBase , db: Session=Depends(get_db), current_user: userDisplay = Depends(get_current_user) ):
-    return cars.create_car(db, request)
+    return cars.create_car(db, request, current_user)
 
 #get all cars 
 @router.get('/', response_model=List[CarDisplay])
