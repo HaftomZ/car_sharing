@@ -16,7 +16,7 @@ class DbPayment(Base):
     transaction_reference = Column(String, unique=True, nullable=False)
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     refund_status = Column(Boolean, default=False)
-    admin_approved = Column(Boolean, default=False)
+   
     
 
     trip_booked = relationship("DbBooking", back_populates="payment")
