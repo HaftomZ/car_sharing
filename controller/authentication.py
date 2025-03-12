@@ -20,12 +20,6 @@ def create_token(request: OAuth2PasswordRequestForm, db: Session):
         access_token = oauth2.create_access_token(data={"sub": str(user.id)})
         return {"access_token": access_token}
 
-    # elif admin:
-    #     if not Hash.Hash.verify(admin.password, request.password):
-    #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid password")
-    #     access_token = oauth2.create_access_token(data={"sub": str(admin.id), "role": "admin"})
-    #     return {"access_token": access_token}
-
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid credentials")
 
@@ -37,22 +31,12 @@ def get_current_user(token: str = Depends(oauth2.oauth2_scheme), db: Session = D
     try:
         payload= jwt.decode(token, oauth2.SECRET_KEY,algorithms=[oauth2.ALGORITHM])
         user_id = payload.get("sub")
-        #role = payload.get("role")
-        if user_id is None: # or role is None:
+        if user_id is None:
             raise credentials_exception
     except JWEError:
        raise credentials_exception
     
-    #if role == "user":
     user = db.query(DbUser).filter(DbUser.id == int(user_id)).first()
     if not user:
         raise credentials_exception
     return user
-
-    # elif role == "admin":
-    #     admin = db.query(DbAdmin).filter(DbAdmin.id == int(user_id)).first()
-    #     if not admin:
-    #         raise credentials_exception
-    #     return admin
-
-    # raise credentials_exception
