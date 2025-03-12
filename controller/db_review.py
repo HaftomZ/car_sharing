@@ -98,8 +98,8 @@ def update_review(db: Session, id: int, request: ReviewBase, current_user: userD
         reviews_received = db.query(DbReview).filter(DbReview.receiver_id == request.receiver_id).all()
         reviews_received_count = len(reviews_received)
         ratings = []
-        for review in reviews_received:
-            ratings.append(review.rating)
+        for reviews in reviews_received:
+            ratings.append(reviews.rating)
         average_rating = round(sum(ratings) / len(reviews_received), 1)
         receiver.average_rating = average_rating
         receiver.reviews_received_count = reviews_received_count

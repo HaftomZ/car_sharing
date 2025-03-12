@@ -7,7 +7,7 @@ from schemas.userSchema import userDisplay
 from controller.authentication import get_current_user
 router = APIRouter(
     prefix="/payments", 
-    tags=["Payments"]
+    tags=["payments"]
     )
 
 @router.post('/',response_model=PaymentResponse,status_code=status.HTTP_201_CREATED)
