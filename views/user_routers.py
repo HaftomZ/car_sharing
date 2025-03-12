@@ -16,7 +16,7 @@ def create_user(req: UserBase, db: Session = Depends(get_db)):
     return users.create_user(db, req)
 
 
-@router.post("/{id}/avatar")
+@router.put("/{id}/avatar")
 def upload_avatar(id: int, file: UploadFile = File(...), db: Session = Depends(get_db),
                   current_user: userDisplay = Depends(get_current_user)):
     return users.upload_avatar(db, id, current_user, file)

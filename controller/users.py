@@ -143,7 +143,7 @@ def update_user(db: Session, id:int, request: UserBase, current_user: userDispla
     user.password = Hash.bcrypt(request.password)
     user.about = request.about
     user.phone_number = request.phone_number
-    user.is_admin == request.is_admin
+    user.is_admin = request.is_admin
 
     if user.id == current_user.id or current_user.is_admin == 1:
         db.commit()
