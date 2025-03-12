@@ -40,7 +40,7 @@ def car_validation(request: CarBase):
     
     #check the availability status
     if request.car_availability_status.lower() not in [CarAvailability.available , CarAvailability.unavailable]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid availability {request.car_availability_status}, it should be available or unavailable")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid availability, it should be available or unavailable")
 
     
 #create car

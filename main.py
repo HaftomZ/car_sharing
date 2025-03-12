@@ -23,7 +23,7 @@ app.include_router(trip_routers.router)
 app.include_router(car_routers.router)
 app.include_router(review_routers.router)
 app.include_router(payment_routers.router)
-# app.include_router(reports_routers.router)
+app.include_router(reports_routers.router)
 
 
 @app.get('/')

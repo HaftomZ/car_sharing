@@ -24,6 +24,14 @@ def create_trip( req:TripBase, db: Session= Depends(get_db), current_user: userD
 def get_all_trips(user_id: int = None, db: Session=Depends(get_db), current_user: userDisplay  = Depends(get_current_user)):
     return trips.get_all_trips(db, user_id)
 
+
+#search trip
+@router.get('/search', response_model=List[TripDisplay])
+def searsh_trip(departure_location: str, destination_location: str, departure_time: datetime,
+                 available_adult_seats: int, available_children_seats: int  , db: Session=Depends(get_db), current_user: userDisplay  = Depends(get_current_user)):
+    return trips.search_trip(db, departure_location, destination_location, departure_time, available_adult_seats, available_children_seats)
+
+
 #get trip
 @router.get('/{id}', response_model=TripDisplay)
 def get_trip(id: int, db: Session=Depends(get_db), current_user: userDisplay  = Depends(get_current_user)):
@@ -34,11 +42,6 @@ def get_trip(id: int, db: Session=Depends(get_db), current_user: userDisplay  = 
 def update_trip( req:TripBase, id: int, db: Session= Depends(get_db), current_user: userDisplay  = Depends(get_current_user)):
     return trips.update_trip(db, req, id, current_user)
 
-#search trip
-@router.get('/search', response_model=List[TripDisplay])
-def searsh_trip(departure_location: str, destination_location: str, departure_time: datetime,
-                 available_adult_seats: int, available_children_seats: int  , db: Session=Depends(get_db), current_user: userDisplay  = Depends(get_current_user)):
-    return trips.search_trip(db, departure_location, destination_location, departure_time, available_adult_seats, available_children_seats)
 
 #delete trip
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)

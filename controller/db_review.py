@@ -1,7 +1,7 @@
 from sqlalchemy.orm.session import Session
 from schemas.reviewSchema import ReviewBase
 from models.Reviews import DbReview
-from fastapi import HTTPException, status, File, UploadFile, Form
+from fastapi import HTTPException, status, File, UploadFile
 from sqlalchemy.sql import func
 from models.Users import DbUser
 from pathlib import Path
@@ -95,6 +95,16 @@ def update_review(db: Session, id: int, request: ReviewBase, current_user: userD
         review.receiver_id = request.receiver_id
         db.commit()
         db.refresh(review)
+        reviews_received = db.query(DbReview).filter(DbReview.receiver_id == request.receiver_id).all()
+        reviews_received_count = len(reviews_received)
+        ratings = []
+        for review in reviews_received:
+            ratings.append(review.rating)
+        average_rating = round(sum(ratings) / len(reviews_received), 1)
+        receiver.average_rating = average_rating
+        receiver.reviews_received_count = reviews_received_count
+        db.commit()
+        db.refresh(receiver)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return review
@@ -104,9 +114,21 @@ def delete_review(db: Session, id: int, current_user: userDisplay):
     review = db.query(DbReview).filter(DbReview.id == id).first()
     if not review:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    receiver_id_from_deleted_review = review.receiver_id
+    receiver = db.query(DbUser).filter(DbUser.id == receiver_id_from_deleted_review).first()
     if review.creator_id == current_user.id or current_user.is_admin == 1:
         db.delete(review)
         db.commit()
+        reviews_received = db.query(DbReview).filter(DbReview.receiver_id == receiver_id_from_deleted_review).all()
+        reviews_received_count = len(reviews_received)
+        ratings = []
+        for review in reviews_received:
+            ratings.append(review.rating)
+        average_rating = round(sum(ratings) / len(reviews_received), 1)
+        receiver.average_rating = average_rating
+        receiver.reviews_received_count = reviews_received_count
+        db.commit()
+        db.refresh(receiver)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return
@@ -114,12 +136,10 @@ def delete_review(db: Session, id: int, current_user: userDisplay):
 
 def upload_photos(db: Session, id: int, current_user: userDisplay, files: list[UploadFile] = File(...)):
     review = db.query(DbReview).filter(DbReview.id == id).first()
+    if not review:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     if review.creator_id == current_user.id or current_user.is_admin == 1:
         file_paths = []
-        if not review:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-        if review.creator_id != current_user.id:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
         for file in files:
             final_path = upload_picture(UPLOAD_DIR, file)
             file_paths.append(str(final_path))
@@ -149,4 +169,4 @@ def delete_photos(db: Session, id: int, current_user: userDisplay):
         db.refresh(review)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    return review
+    return
