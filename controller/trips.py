@@ -13,6 +13,7 @@ from datetime import timezone
 from sqlalchemy import  func 
 from controller import cars
 import requests
+from sqlalchemy import and_, or_
 
 def trip_duration(departure_time: datetime, arrival_time: datetime):
     duration = arrival_time - departure_time
@@ -84,10 +85,16 @@ def create_trip(db: Session, request: TripBase, current_user: userDisplay):
 
     #check the status 
     if request.status.lower() != TripStatus.scheduled:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid status {request.status}, it should be only scheduled")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= "Invalid status, it should be only scheduled")
 
     #check if the user have a trip before with the same car and during the same time
-    trip = db.query(DbTrip).filter(DbTrip.creator_id == request.creator_id, DbTrip.car_id == request.car_id, DbTrip.departure_time<=request.departure_time, DbTrip.arrival_time>=request.departure_time).first()
+    trip = db.query(DbTrip).filter(DbTrip.creator_id == request.creator_id,
+                                   DbTrip.car_id == request.car_id,
+                                    or_(
+                                        and_(DbTrip.departure_time <= request.departure_time, DbTrip.arrival_time >= request.departure_time),
+                                        and_(DbTrip.departure_time <= request.arrival_time, DbTrip.arrival_time >= request.arrival_time),
+                                        and_(DbTrip.departure_time >= request.departure_time, DbTrip.arrival_time <= request.arrival_time)  # New trip fully surrounds an existing trip
+                                    )).first()
     if trip:
         raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail= f'You can not add a trip with car id {request.car_id}, because user {request.creator_id} already has a trip that its id is {trip.id} with the same car during this time.')
 
@@ -125,19 +132,24 @@ def update_trip(db: Session,request: TripBase, trip_id: int, current_user: userD
     if trip.first().status != TripStatus.scheduled:
         raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail= f'You can not update trip {trip_id} when its status is {trip.first().status}')
     
-    #check the new user that the creator wants to move this trip for
-    new_user = db.query(DbUser).filter(DbUser.id == request.creator_id).first()
-    if not new_user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'The user {request.creator_id} that you want to move this trip for, is not exsited')
-    
+    if trip.first().creator_id != request.creator_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail= 'the creator of the trip can not be changed')
+
     trip_vaildation(db, request)
 
     #check the status 
     if request.status.lower() not in [TripStatus.scheduled, TripStatus.ongoing, TripStatus.completed]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= f"Invalid status {request.status}, it should be scheduled, ongoing or completed")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= "Invalid status, it should be scheduled, ongoing or completed")
 
     #check if the user have a trip before with the same car and during the same time
-    pervious_trip = db.query(DbTrip).filter(DbTrip.creator_id == request.creator_id, DbTrip.car_id == request.car_id, DbTrip.id != trip_id, DbTrip.departure_time<=request.departure_time, DbTrip.arrival_time>=request.departure_time).first()
+    pervious_trip = db.query(DbTrip).filter(DbTrip.creator_id == request.creator_id,
+                                            DbTrip.car_id == request.car_id,
+                                            DbTrip.id != trip_id,
+                                            or_(
+                                                and_(DbTrip.departure_time <= request.departure_time, DbTrip.arrival_time >= request.departure_time),
+                                                and_(DbTrip.departure_time <= request.arrival_time, DbTrip.arrival_time >= request.arrival_time),
+                                                and_(DbTrip.departure_time >= request.departure_time, DbTrip.arrival_time <= request.arrival_time)  # New trip fully surrounds an existing trip
+                                            )).first()
     if pervious_trip:
         raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail= f'You can not update this trip with this time, because user {request.creator_id} already has a trip that its id is {pervious_trip.id} with the same car during this time.')
 
@@ -153,7 +165,6 @@ def update_trip(db: Session,request: TripBase, trip_id: int, current_user: userD
         DbTrip.status : request.status.lower(),
         DbTrip.updated_at : func.now(),
         DbTrip.duration: trip_duration(request.departure_time, request.arrival_time),
-        DbTrip.creator_id : request.creator_id,
         DbTrip.car_id : request.car_id
         })
     
