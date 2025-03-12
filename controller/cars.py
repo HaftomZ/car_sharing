@@ -102,6 +102,12 @@ def update_car(db: Session , car_id: int, request: CarBase, current_user: userDi
     if car.first().owner_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     
+    #check if the user that the current user wants to move this car for, is exsited
+    new_user= db.query(DbUser).filter(DbUser.id == request.owner_id).first()
+    if not new_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f'You can not update this car to be for user {request.owner_id} , because this user is not exsited')
+    
+
     car_validation(request)
 
     car.update({ 
