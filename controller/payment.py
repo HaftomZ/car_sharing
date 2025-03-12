@@ -26,6 +26,8 @@ def create_payment(db:Session, request:Paymentbase):
           raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,detail=f"Incorrect payment amount. Expected {total_cost} but received {request.amount}.")
      if request.payment_method.lower() not in payment_methods:
           raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Invalid payment method.")
+     if temp_bookings.status == "Confirmed":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Payment was already made for this booking.")
 
      transaction_status = "completed" if payment_status_toggle else "failed"
      payment_status_toggle = not payment_status_toggle
@@ -60,22 +62,27 @@ def create_payment(db:Session, request:Paymentbase):
 def get_payments(db:Session,user_id:int,current_user:userDisplay):
     payments = db.query(DbPayment)
     if user_id is not None:
+      
       users = db.query(DbUser).filter(DbUser.id==user_id).first()
       if user_id != current_user.id and current_user.is_admin != True:
           raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
       if not users:
           raise  HTTPException(status_code = status.HTTP_404_NOT_FOUND) 
       payments = payments.filter(DbPayment.user_id == user_id)
+
     else:
         if current_user.is_admin != True:
              raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="You must be an admin")
+        
     return payments.all()
+
 def get_a_payment(db:Session,payment_id:int,current_user:userDisplay):
+
     payments = db.query(DbPayment).filter(DbPayment.payment_id == payment_id).first()
-    if current_user is None: 
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not logged in")
+
     if not payments:
         raise  HTTPException(status_code = status.HTTP_404_NOT_FOUND) 
     if payments.user_id != current_user.id:
-         raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
+         raise HTTPException(status_code= status.HTTP_403_FORBIDDEN)
+    
     return payments
