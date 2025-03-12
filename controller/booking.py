@@ -10,10 +10,10 @@ from threading import Timer
 from datetime import datetime,timezone,timedelta
 from schemas.userSchema import UserBase,userDisplay
 
-def create_booking(db: Session,request: BookingBase,current_user:int):
+def create_booking(db: Session,request: BookingBase,current_user:userDisplay):
    
-    if request.booker_id != current_user:
-        raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
+    if request.booker_id != current_user.id and current_user.is_admin != True:
+        raise HTTPException(status_code= status.HTTP_403_FORBIDDEN)
     users = db.query(DbUser).filter(DbUser.id == request.booker_id).first()
     trip = db.query(DbTrip).filter(DbTrip.id==request.trip_id)
 
@@ -99,13 +99,16 @@ def release_seat_if_payment_fails(booker_id : int, trip_id : int, db:Session):
        db.delete(temp_booking)  
        db.commit()
 #After cancelling the booking, the seats that were booked must be released and car availablity must be updated.
-def cancel_booking(db: Session, booking_id:int, current_user: int):
+def cancel_booking(db: Session, booking_id:int, current_user: userDisplay):
         
         booking_tobe_cancelled = db.query(DbBooking).filter(DbBooking.booking_id == booking_id).first()
-        if booking_tobe_cancelled.booker_id != current_user:
-            raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
+        if current_user is None: 
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not logged in")
         if not booking_tobe_cancelled:
-             raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="No booking found")
+             raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND)
+        if booking_tobe_cancelled.booker_id != current_user.id and current_user.is_admin != True:
+            raise HTTPException(status_code= status.HTTP_403_FORBIDDEN)
+       
         
         trip=db.query(DbTrip).filter(DbTrip.id == booking_tobe_cancelled.trip_id)
 
@@ -145,13 +148,16 @@ def cancel_booking(db: Session, booking_id:int, current_user: int):
 
 
 # After updating a booking, the available seats and car availabilty has to be updated.
-def update_my_bookings(db: Session,booking_id: int, request: BookingBase,current_user:int):
+def update_my_bookings(db: Session,booking_id: int, request: BookingBase,current_user:userDisplay):
 
     booking_tobe_update = db.query(DbBooking).filter(DbBooking.booking_id == booking_id)
-    if booking_tobe_update.first().booker_id != current_user:
-        raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
+    if current_user is None: 
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not logged in")
     if not booking_tobe_update.first():
         raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "Booking not found")
+    if booking_tobe_update.first().booker_id != current_user.id and current_user.is_admin != True:
+        raise HTTPException(status_code= status.HTTP_403_FORBIDDEN)
+    
     
     trip = db.query(DbTrip).filter(DbTrip.id == booking_tobe_update.first().trip_id)
 
@@ -165,10 +171,11 @@ def update_my_bookings(db: Session,booking_id: int, request: BookingBase,current
         raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail="you can't update, grace time is over")
     
     if booking_tobe_update.first().status == "Confirmed": 
-        allowed_updates = {"pickup_location", "end_location"}
-        for key in allowed_updates:
-            if hasattr(request, key) and getattr(request, key) is not None:
-                setattr(booking_tobe_update.first(), key, getattr(request, key)) 
+        if booking_tobe_update.first().adult_seats != request.adult_seats or\
+           booking_tobe_update.first().children_seats != request.children_seats or\
+           booking_tobe_update.first().booker_id != request.booker_id or\
+           booking_tobe_update.first().trip_id != request.trip_id :
+           raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail= "Only pickup_location and end_location can be updated")
     else:
      adult_seats_diff = request.adult_seats - booking_tobe_update.first().adult_seats
      children_seats_diff = request.children_seats - booking_tobe_update.first().children_seats
@@ -192,13 +199,13 @@ def update_my_bookings(db: Session,booking_id: int, request: BookingBase,current
      DbTrip.available_children_seats: trip.first().available_children_seats,
      DbTrip.passengers_count : trip.first().passengers_count
      })
-     booking_tobe_update.update({
+    booking_tobe_update.update({
         DbBooking.pickup_location : request.pickup_location,
         DbBooking.end_location:request.end_location,
         DbBooking.adult_seats : request.adult_seats,
         DbBooking.children_seats :request.children_seats
       })
-     db.commit()
+    db.commit()
    
     if trip.first().available_adult_seats==0:          
             car_status ="Unavailable"
@@ -211,21 +218,28 @@ def update_my_bookings(db: Session,booking_id: int, request: BookingBase,current
 
     return booking_tobe_update.first()
    
-def list_of_bookings(db: Session, user_id: int, current_id: int):
+def list_of_bookings(db: Session, user_id: int, current_user: userDisplay):
     lists= db.query(DbBooking)
     if user_id is not None:
       users = db.query(DbUser).filter(DbUser.id==user_id).first()
-      if user_id != current_id:
+      if user_id != current_user.id and current_user.is_admin != True:
           raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
       if not users:
-          raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="No such user ID") 
+          raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND) 
       lists = lists.filter(DbBooking.booker_id == user_id)
+    else:
+        if current_user.is_admin != True:
+             raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="You must be an admin")
     return lists.all()
-def get_a_booking(db: Session, booking_id: int, current_id : int):
+
+def get_a_booking(db: Session, booking_id: int, current_user : userDisplay):
      lists = db.query(DbBooking).filter(DbBooking.booking_id == booking_id).first()
-     if lists.booker_id != current_id:
-         raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
+     if current_user is None: 
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not logged in")
      if not lists:
-      raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= "No such booking ID")
+      raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND)
+     if lists.booker_id != current_user.id and current_user.is_admin != True:
+         raise HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail="Not allowed")
+     
      return lists
 

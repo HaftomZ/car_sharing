@@ -14,20 +14,20 @@ router = APIRouter(
 
 @router.post('/', response_model=BookingDisplay, status_code=status.HTTP_201_CREATED)
 def create_booking(req: BookingBase,db: Session= Depends(get_db),current_user: userDisplay = Depends(get_current_user)):
-    return booking.create_booking(db,req,current_user.id)
+    return booking.create_booking(db,req,current_user)
   
 @router.delete('/{id}',status_code=status.HTTP_204_NO_CONTENT)
 def cancel_booking(id: int, db: Session= Depends(get_db),current_user: userDisplay = Depends(get_current_user)):
-    return booking.cancel_booking(db,id,current_user.id)
+    return booking.cancel_booking(db,id,current_user)
 
 @router.put('/{id}')
 def update_my_bookings(id: int, req: BookingBase, db: Session= Depends(get_db),current_user: userDisplay = Depends(get_current_user)):
-    return booking.update_my_bookings(db,id, req,current_user.id)
+    return booking.update_my_bookings(db,id, req,current_user)
 
 @router.get('/', response_model= list[listBookingResponse])
 def list_of_bookings(user_id: int= None, db: Session= Depends(get_db),current_user: userDisplay = Depends(get_current_user)):
-    return booking.list_of_bookings(db, user_id,current_user.id)
+    return booking.list_of_bookings(db, user_id,current_user)
 
 @router.get('/{id}')
 def get_a_booking(id:int, db: Session= Depends(get_db),current_user: userDisplay = Depends(get_current_user)):
-    return booking.get_a_booking(db,id,current_user.id)
+    return booking.get_a_booking(db,id,current_user)
