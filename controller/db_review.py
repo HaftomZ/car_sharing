@@ -1,7 +1,7 @@
 from sqlalchemy.orm.session import Session
 from schemas.reviewSchema import ReviewBase
 from models.Reviews import DbReview
-from fastapi import HTTPException, status, File, UploadFile, Form
+from fastapi import HTTPException, status, File, UploadFile
 from sqlalchemy.sql import func
 from models.Users import DbUser
 from pathlib import Path
@@ -136,10 +136,10 @@ def delete_review(db: Session, id: int, current_user: userDisplay):
 
 def upload_photos(db: Session, id: int, current_user: userDisplay, files: list[UploadFile] = File(...)):
     review = db.query(DbReview).filter(DbReview.id == id).first()
+    if not review:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     if review.creator_id == current_user.id or current_user.is_admin == 1:
         file_paths = []
-        if not review:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         for file in files:
             final_path = upload_picture(UPLOAD_DIR, file)
             file_paths.append(str(final_path))
