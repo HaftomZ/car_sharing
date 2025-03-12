@@ -1,7 +1,7 @@
 from config.Hash import Hash
 from sqlalchemy.orm.session import Session
 from config.email_confirmation import send_verification_email, generate_email_token, verify_email_token
-from schemas.userSchema import UserBase, userDisplay
+from schemas.userSchema import UserBase, userDisplay, UserUpdateResponse
 from models.Users import DbUser
 from fastapi.responses import JSONResponse
 import re
@@ -100,7 +100,7 @@ def delete_avatar(db: Session, id: int, current_user: userDisplay):
         db.refresh(user)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    return user
+    return
 
 
 
@@ -137,6 +137,7 @@ def update_user(db: Session, id:int, request: UserBase, current_user: userDispla
     
     if user.id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    
     user.user_name = request.username
     user.email = request.email
     user.password = Hash.bcrypt(request.password)
@@ -144,7 +145,14 @@ def update_user(db: Session, id:int, request: UserBase, current_user: userDispla
     user.phone_number = request.phone_number
     db.commit()
     db.refresh(user)
-    return 'user information has been updated successfully!'
+    return UserUpdateResponse(
+        id= user.id,
+        user_name = user.user_name,
+        email= user.email,
+        about = user.about,
+        phone_number= user.phone_number,
+        is_admin= user.is_admin
+    )
 
 def delete_user(db: Session, id: int, current_user: userDisplay):
     user = db.query(DbUser).filter(DbUser.id == id).first()
