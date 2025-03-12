@@ -64,10 +64,22 @@ class userDisplay(BaseModel):
     average_rating: Optional[float] = None  
     reviews_received_count: Optional[int] = None
 
+class UserUpdateResponse(BaseModel): 
+    id: int
+    user_name: str
+    email: EmailStr
+    about: Optional[str] = None
+    phone_number: Optional[str] = None
+    is_admin: bool = False
+
+    class Config:
+        from_attributes = True
+
 
 
     class Config():
         from_attributes = True
+        json_encoders = {"password": lambda v: None}
 
     
 
