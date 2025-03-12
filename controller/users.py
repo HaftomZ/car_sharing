@@ -38,7 +38,8 @@ def create_user(db: Session, request: UserBase):
         password = Hash.bcrypt(request.password),
         about = request.about,
         phone_number = request.phone_number,
-        avatar="avatars/default_avatar.jpg"
+        avatar="avatars/default_avatar.jpg",
+        is_admin = request.is_admin
     )
 
     db.add(new_user)
