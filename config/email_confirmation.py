@@ -13,7 +13,7 @@ SMTP_PASSWORD = "tksd pynp dole gzyk"
 
 def send_verification_email(email: str, token: str):
     subject = "HRIN: Confirm your email"
-    body = f"Click the link to confirm your email: http://localhost:8000/users/verify?token={token}"
+    body = f"Click the link to confirm your email: http://localhost:8000/verifications/{token}"
 
     msg = MIMEText(body)
     msg["Subject"] = subject

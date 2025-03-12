@@ -49,7 +49,7 @@ def create_user(db: Session, request: UserBase):
     send_verification_email(request.email, token)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
-        content={"message": "Account has been created!, Please Log in!"}
+        content={"message": "Account has been created. Please confirm your email."}
     )
 
 
@@ -67,33 +67,39 @@ UPLOAD_DIR = Path("avatars")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
-def upload_avatar(db: Session, id: int, file: UploadFile = File(...)):
+def upload_avatar(db: Session, id: int, current_user: userDisplay, file: UploadFile = File(...)):
     user = db.query(DbUser).filter(DbUser.id == id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    old_avatar_path = Path(user.avatar)
-    if old_avatar_path.exists() and old_avatar_path != Path("avatars/default_avatar.jpg"):
-        old_avatar_path.unlink()
-    final_path = upload_picture(UPLOAD_DIR, file)
-    user.avatar = str(final_path)
-    db.commit()
-    db.refresh(user)
+    if user.id == current_user.id or current_user.is_admin == 1:
+        old_avatar_path = Path(user.avatar)
+        if old_avatar_path.exists() and old_avatar_path != Path("avatars/default_avatar.jpg"):
+            old_avatar_path.unlink()
+        final_path = upload_picture(UPLOAD_DIR, file)
+        user.avatar = str(final_path)
+        db.commit()
+        db.refresh(user)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return user
 
 
-def delete_avatar(db: Session, id: int):
+def delete_avatar(db: Session, id: int, current_user: userDisplay):
     user = db.query(DbUser).filter(DbUser.id == id).first()
     if not user:
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                              detail=f'User with id {id} is not exist!')
-    avatar_path = Path(user.avatar)
-    if avatar_path == Path("avatars/default_avatar.jpg"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f'You can not delete default avatar!')
-    avatar_path.unlink()
-    user.avatar = "avatars/default_avatar.jpg"
-    db.commit()
-    db.refresh(user)
+    if user.id == current_user.id or current_user.is_admin == 1:
+        avatar_path = Path(user.avatar)
+        if avatar_path == Path("avatars/default_avatar.jpg"):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f'You can not delete default avatar!')
+        avatar_path.unlink()
+        user.avatar = "avatars/default_avatar.jpg"
+        db.commit()
+        db.refresh(user)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return user
 
 
@@ -117,7 +123,7 @@ def get_user_by_id(db: Session, id: int):
     return user
 
 
-def update_user(db: Session, id:int, request: UserBase):
+def update_user(db: Session, id:int, request: UserBase, current_user: userDisplay):
     if len(request.about) >= 50:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -129,11 +135,8 @@ def update_user(db: Session, id:int, request: UserBase):
          raise HTTPException(status_code= status.HTTP_404_NOT_FOUND,
                              detail = f'user with id {id} is not exist!')
     
-    if user.id != id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f'You do not have rights to update this user'
-        )
+    if user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     user.user_name = request.username
     user.email = request.email
     user.password = Hash.bcrypt(request.password)
@@ -143,11 +146,12 @@ def update_user(db: Session, id:int, request: UserBase):
     db.refresh(user)
     return 'user information has been updated successfully!'
 
-def delete_user(db: Session, id: int):
+def delete_user(db: Session, id: int, current_user: userDisplay):
     user = db.query(DbUser).filter(DbUser.id == id).first()
     if not user:
-         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND,
-                             detail = f'user with id {id} is not exist!')
+         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND)
+    if user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     db.delete(user)
     db.commit()
     return JSONResponse(
