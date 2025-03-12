@@ -17,7 +17,7 @@ router = APIRouter(
 #create a trip
 @router.post('/',  response_model=TripDisplay , status_code=status.HTTP_201_CREATED)
 def create_trip( req:TripBase, db: Session= Depends(get_db), current_user: userDisplay  = Depends(get_current_user)):
-    return trips.create_trip(db, req)
+    return trips.create_trip(db, req, current_user)
 
 #get all trips
 @router.get('/', response_model=List[TripDisplay])
