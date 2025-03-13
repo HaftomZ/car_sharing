@@ -24,7 +24,7 @@ def create_review(db: Session, request: ReviewBase):
     if request.creator_id == request.receiver_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                              detail=f'You can not leave review about yourself.')
-    if len(request.text_description) >= 300:
+    if len(request.text_description) >= 500:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Text description cannot be more than 300 characters."
@@ -85,7 +85,7 @@ def update_review(db: Session, id: int, request: ReviewBase, current_user: userD
         if not receiver:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                  detail=f'None exist user can not receive reviews')
-        if len(request.text_description) >= 300:
+        if len(request.text_description) >= 500:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Text description  cannot be more than 300 characters.")
