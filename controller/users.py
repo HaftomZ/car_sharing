@@ -114,8 +114,6 @@ def delete_avatar(db: Session, id: int, current_user: userDisplay):
 
 def get_all_users(db:Session)-> List[userDisplay]:
     all_users = db.query(DbUser).all()
-    if not all_users:
-        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f'there are no users found!')
     return all_users
 
 
@@ -124,8 +122,7 @@ def get_user_by_id(db: Session, id: int):
     
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found!"
+            status_code=status.HTTP_404_NOT_FOUND
         )
        
     return user
@@ -142,10 +139,7 @@ def update_user(db: Session, id:int, request: UserBase, current_user: userDispla
     if not user:
          raise HTTPException(status_code= status.HTTP_404_NOT_FOUND,
                              detail = f'user with id {id} is not exist!')
-    
-    if user.id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    
+
     user.user_name = request.username
     user.email = request.email
     user.password = Hash.bcrypt(request.password)
@@ -156,6 +150,8 @@ def update_user(db: Session, id:int, request: UserBase, current_user: userDispla
     if user.id == current_user.id or current_user.is_admin == 1:
         db.commit()
         db.refresh(user)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return UserUpdateResponse(
         id= user.id,
         user_name = user.user_name,
@@ -170,10 +166,10 @@ def delete_user(db: Session, id: int, current_user: userDisplay):
     user = db.query(DbUser).filter(DbUser.id == id).first()
     if not user:
          raise HTTPException(status_code= status.HTTP_404_NOT_FOUND)
-    # if user.id != current_user.id:
-    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     if user.id == current_user.id or current_user.is_admin == 1:
         db.delete(user)
         db.commit()
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return 
        
