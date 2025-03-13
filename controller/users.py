@@ -81,7 +81,15 @@ def upload_avatar(db: Session, id: int, current_user: userDisplay, file: UploadF
         db.refresh(user)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    return user
+    return UserUpdateResponse(
+        id= user.id,
+        user_name = user.user_name,
+        email= user.email,
+        about = user.about,
+        phone_number= user.phone_number,
+        is_admin= user.is_admin,
+        avatar = user.avatar
+    )
 
 
 def delete_avatar(db: Session, id: int, current_user: userDisplay):
@@ -143,7 +151,7 @@ def update_user(db: Session, id:int, request: UserBase, current_user: userDispla
     user.password = Hash.bcrypt(request.password)
     user.about = request.about
     user.phone_number = request.phone_number
-    user.is_admin == request.is_admin
+    user.is_admin = request.is_admin
 
     if user.id == current_user.id or current_user.is_admin == 1:
         db.commit()
@@ -154,7 +162,8 @@ def update_user(db: Session, id:int, request: UserBase, current_user: userDispla
         email= user.email,
         about = user.about,
         phone_number= user.phone_number,
-        is_admin= user.is_admin
+        is_admin= user.is_admin,
+        avatar = user.avatar
     )
 
 def delete_user(db: Session, id: int, current_user: userDisplay):
@@ -165,7 +174,5 @@ def delete_user(db: Session, id: int, current_user: userDisplay):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     db.delete(user)
     db.commit()
-    return JSONResponse(
-        status_code=status.HTTP_204_NO_CONTENT,
-        content={"message": "User account has been deleted!"}
-    )
+    return 
+       

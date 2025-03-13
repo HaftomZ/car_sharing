@@ -16,7 +16,7 @@ def create_user(req: UserBase, db: Session = Depends(get_db)):
     return users.create_user(db, req)
 
 
-@router.post("/{id}/avatar")
+@router.put("/{id}/avatar")
 def upload_avatar(id: int, file: UploadFile = File(...), db: Session = Depends(get_db),
                   current_user: userDisplay = Depends(get_current_user)):
     return users.upload_avatar(db, id, current_user, file)
@@ -38,7 +38,7 @@ def update_user(id: int, request: UserBase, db: Session = Depends(get_db),
                 current_user: userDisplay = Depends(get_current_user)):
     return users.update_user(db, id, request, current_user)
 
-@router.delete('/{id}')
+@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(id: int, db: Session = Depends(get_db), current_user: userDisplay = Depends(get_current_user)):
     return users.delete_user(db, id, current_user)
 

@@ -46,7 +46,7 @@ def get_reviews(creator_id: int = None, receiver_id: int = None, db: Session = D
 
 
 # Update review
-@router.put('/{id}')
+@router.put('/{id}', response_model=ReviewDisplay)
 def update_review(id: int, request: ReviewBase, db: Session = Depends(get_db),
                   current_user: userDisplay = Depends(get_current_user)):
     return db_review.update_review(db, id, request, current_user)
