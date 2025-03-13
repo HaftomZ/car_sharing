@@ -6,7 +6,7 @@ from sqlalchemy.orm.session import Session
 from schemas.paymentSchema import *
 from fastapi import HTTPException, status
 import uuid
-from datetime import datetime,timezone
+from datetime import datetime,timezone,timedelta
 from schemas.userSchema import UserBase,userDisplay 
 from controller.authentication import get_current_user
 
@@ -21,6 +21,12 @@ def create_payment(db:Session, request:Paymentbase):
      trip = db.query(DbTrip).filter(DbTrip.id == temp_bookings.trip_id).first()
      if trip.status=="cancelled":
          raise  HTTPException(status_code= status.HTTP_404_NOT_FOUND,detail= "trip is cancelled")
+     
+     trip_departure_time = trip.departure_time.replace(tzinfo=timezone.utc)
+     grace_time =  trip_departure_time - datetime.now(timezone.utc)  
+     if grace_time <=timedelta(seconds=0):
+           raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail="You can't pay, grace time is over")
+     
      total_cost = trip.cost *(temp_bookings.adult_seats + temp_bookings.children_seats)
      if request.amount != total_cost:
           raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,detail=f"Incorrect payment amount. Expected {total_cost} but received {request.amount}.")
