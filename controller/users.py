@@ -170,9 +170,10 @@ def delete_user(db: Session, id: int, current_user: userDisplay):
     user = db.query(DbUser).filter(DbUser.id == id).first()
     if not user:
          raise HTTPException(status_code= status.HTTP_404_NOT_FOUND)
-    if user.id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    db.delete(user)
-    db.commit()
+    # if user.id != current_user.id:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    if user.id == current_user.id or current_user.is_admin == 1:
+        db.delete(user)
+        db.commit()
     return 
        
