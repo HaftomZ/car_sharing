@@ -71,6 +71,7 @@ class UserUpdateResponse(BaseModel):
     about: Optional[str] = None
     phone_number: Optional[str] = None
     is_admin: bool = False
+    avatar: str | None = None
 
     class Config:
         from_attributes = True
